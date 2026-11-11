@@ -154,18 +154,29 @@ tr.click{cursor:pointer}
 .item .acts{display:flex;gap:4px;flex-shrink:0}
 .empty{padding:18px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:8px;font-size:.9rem}
 
-/* binary view */
-.brow{display:grid;grid-template-columns:120px minmax(0,1fr) 150px;gap:14px;align-items:center;padding:8px 0}
-.brow + .brow{border-top:1px dashed var(--line)}
-.brow .op{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
-.brow .dec{font-family:var(--f-mono);text-align:right;font-size:.95rem}
-@media (max-width:760px){.brow{grid-template-columns:minmax(0,1fr)}.brow .dec{text-align:left}}
-.place{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;max-width:520px}
-.place button{display:grid;gap:2px;justify-items:center;padding:8px 0;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer}
+/* number conversion */
+.cv-inputs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.cv-inputs{grid-template-columns:minmax(0,1fr)}}
+.place-rows{display:grid;gap:6px}
+.place{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;max-width:560px}
+.place button{display:grid;gap:2px;justify-items:center;padding:8px 0;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer;min-width:0}
 .place button small{font-size:.7rem;color:var(--muted);font-family:var(--f-mono)}
 .place button b{font-family:var(--f-mono);font-size:1.1rem}
 .place button[aria-pressed="true"]{background:var(--net);border-color:var(--net);color:var(--net-ink)}
 .place button[aria-pressed="true"] small{color:var(--net-ink)}
+.sum{font-family:var(--f-mono);margin-top:12px;overflow-wrap:anywhere;line-height:1.7}
+.sum b{color:var(--net)}
+td.on{background:var(--net-soft);font-weight:600}
+.groups{display:flex;flex-wrap:wrap;gap:8px}
+.grp{border:1px solid var(--line);border-radius:8px;padding:8px 12px;text-align:center;font-family:var(--f-mono);display:grid;gap:2px}
+.grp span{font-size:.85rem}
+.grp b{font-size:1.3rem;color:var(--net)}
+.nib-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+@media (max-width:620px){.nib-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.nib{border:1px solid var(--line);border-radius:8px;padding:8px 4px;text-align:center;background:var(--surface);cursor:pointer;display:grid;gap:1px}
+.nib:hover{background:var(--sunken)}
+.nib b{font-family:var(--f-mono);font-size:1.25rem;color:var(--net)}
+.nib span{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
 
 /* vlsm */
 .vrows{display:grid;gap:8px}
@@ -229,7 +240,7 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
       <div class="glyph" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i class="h"></i><i class="h"></i><i class="h"></i></div>
       <div>
         <h1>Subnet Calculator</h1>
-        <p class="tagline">IPv4 subnets, binary, masks, VLSM and practice</p>
+        <p class="tagline">IPv4 subnets, masks, VLSM, number conversion and practice</p>
       </div>
     </div>
     <div class="legend" aria-label="Bit colors">
@@ -242,7 +253,7 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
   <div class="tabs-scroll">
     <nav class="tabs" role="tablist" aria-label="Tools">
       <button class="tab" role="tab" data-view="calc">Calculator</button>
-      <button class="tab" role="tab" data-view="binary">Binary view</button>
+      <button class="tab" role="tab" data-view="convert">Number conversion</button>
       <button class="tab" role="tab" data-view="masks">Mask converter</button>
       <button class="tab" role="tab" data-view="equal">Equal subnets</button>
       <button class="tab" role="tab" data-view="vlsm">VLSM planner</button>
@@ -291,28 +302,64 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
     </div>
   </section>
 
-  <!-- BINARY -->
-  <section class="view" id="v-binary" data-view="binary" hidden>
+  <!-- CONVERT -->
+  <section class="view" id="v-convert" data-view="convert" hidden>
     <div class="panel">
-      <div class="panel-head">
-        <div><h2>Binary view</h2><p class="muted small">The network address is the IP AND the mask. The broadcast is the network OR the wildcard. Click any IP bit to flip it, or a mask bit to move the prefix.</p></div>
-        <button class="btn" id="bin-export">Export</button>
+      <div class="panel-head"><div><h2>Number conversion</h2><p class="muted small">Type in any box and the other two update. The working for every method is shown below.</p></div></div>
+      <div class="cv-inputs">
+        <div class="field"><label class="label" for="cv-dec">Decimal · base 10</label><input type="text" class="big" id="cv-dec" value="200" inputmode="numeric" spellcheck="false" autocomplete="off"></div>
+        <div class="field"><label class="label" for="cv-bin">Binary · base 2</label><input type="text" class="big" id="cv-bin" spellcheck="false" autocomplete="off"></div>
+        <div class="field"><label class="label" for="cv-hex">Hexadecimal · base 16</label><input type="text" class="big" id="cv-hex" spellcheck="false" autocomplete="off"></div>
       </div>
-      <div class="row" style="margin-bottom:12px">
-        <div class="field grow"><label class="label" for="bin-in">IP address with prefix</label><input type="text" id="bin-in" class="mono" spellcheck="false"></div>
-        <div class="field" style="flex:0 1 220px"><label class="label" for="bin-prefix">Prefix <span id="bin-prefix-out" class="mono"></span></label><input type="range" id="bin-prefix" min="0" max="32"></div>
-      </div>
-      <div id="bin-rows"></div>
+      <p class="err" id="cv-err" hidden></p>
+      <div class="field" style="margin-top:16px"><span class="label">Place values · click a bit to flip it</span><div class="place-rows" id="oct-place"></div></div>
     </div>
-    <div class="panel">
-      <div class="panel-head"><div><h3>Octet converter</h3><p class="muted small">Toggle the place values or type a number from 0 to 255.</p></div></div>
-      <div class="row" style="margin-bottom:12px;align-items:center">
-        <div class="field" style="width:120px"><label class="label" for="oct-dec">Decimal</label><input type="number" id="oct-dec" min="0" max="255" value="192" class="mono"></div>
-        <div class="field"><span class="label">Binary</span><span class="mono" id="oct-bin" style="font-size:1.2rem"></span></div>
-        <div class="field"><span class="label">Hex</span><span class="mono" id="oct-hex" style="font-size:1.2rem"></span></div>
+
+    <div class="cols-even">
+      <div class="panel">
+        <div class="panel-head"><h3>Decimal → binary</h3><div class="seg" id="cv-method"><button data-m="sub" aria-pressed="true">Subtract place values</button><button data-m="div" aria-pressed="false">Divide by 2</button></div></div>
+        <div id="cv-d2b"></div>
       </div>
-      <div class="place" id="oct-place"></div>
-      <p class="note" id="oct-sum" style="margin-top:10px"></p>
+      <div class="panel">
+        <div class="panel-head"><h3>Binary → decimal</h3></div>
+        <p class="note" style="margin-bottom:10px">Write the place value over each bit, then add up the places that hold a 1.</p>
+        <div id="cv-b2d"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Binary ↔ hexadecimal</h3></div>
+        <p class="note" style="margin-bottom:10px">Split the bits into groups of four (nibbles) from the right. Each nibble is one hex digit, using the 8 4 2 1 place values inside it.</p>
+        <div id="cv-b2h"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Decimal ↔ hexadecimal</h3></div>
+        <div id="cv-d2h"></div>
+      </div>
+    </div>
+
+    <div class="cols-even">
+      <div class="panel">
+        <div class="panel-head"><div><h3>Convert an IP address</h3><p class="muted small">Each octet is converted on its own.</p></div></div>
+        <input type="text" class="mono" id="cv-ip" value="192.168.1.10" spellcheck="false" autocomplete="off" aria-label="IP address to convert">
+        <div class="tbl-wrap" style="margin-top:12px"><table id="cv-ip-table"></table></div>
+        <dl class="kv" id="cv-ip-kv" style="grid-template-columns:minmax(0,1fr);margin-top:8px"></dl>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Conversion drill</h3><span class="mono small muted" id="cv-score"></span></div>
+        <p class="qprompt" id="cv-prompt" style="font-size:1.15rem"></p>
+        <form id="cv-form" class="row" style="margin-top:14px" autocomplete="off">
+          <div class="field grow"><label class="label" for="cv-ans">Your answer</label><input type="text" class="mono" id="cv-ans" spellcheck="false"></div>
+          <button class="btn primary" type="submit" id="cv-check">Check</button>
+          <button class="btn" type="button" id="cv-next">Next</button>
+        </form>
+        <div id="cv-feedback"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><div><h3>Nibble reference</h3><p class="muted small">Every hex digit and its 4-bit pattern. Click one to convert it.</p></div></div>
+      <div class="nib-grid" id="cv-nibbles"></div>
+      <p class="label" style="margin-top:16px;margin-bottom:8px">Mask octet values</p>
+      <div class="tbl-wrap"><table id="cv-masks"></table></div>
     </div>
   </section>
 
@@ -765,9 +812,8 @@ function setCalc(ip,p,{from}={}){
   state.ip=ip; state.p=p;
   const txt = ipStr(ip)+'/'+p;
   if(from!=='calc-in') $('#calc-in').value = txt;
-  if(from!=='bin-in') $('#bin-in').value = txt;
   $('#calc-in').classList.remove('invalid'); $('#calc-err').hidden=true;
-  renderCalc(); renderBinary();
+  renderCalc();
   logHistory('calc', txt, {input:txt});
 }
 function calcKV(){
@@ -825,36 +871,145 @@ $('#calc-kv').addEventListener('click',e=>{ const d=e.target.closest('dd'); if(d
 $('#calc-save').onclick=()=>{ const c=calc(state.ip,state.p); const t=ipStr(state.ip)+'/'+state.p; openSave('calc', `${ipStr(c.net)}/${c.p} subnet`, {input:t}); };
 $('#calc-export').onclick=()=>{ const c=calc(state.ip,state.p); openExport({title:`Subnet ${ipStr(c.net)}/${c.p}`, kv:calcKV()}); };
 
-/* ================= BINARY ================= */
-function renderBinary(){
-  const c=calc(state.ip,state.p);
-  $('#bin-prefix').value=c.p; $('#bin-prefix-out').textContent='/'+c.p;
-  const rows=[
-    ['IP address','',c.ip,'ip'],['Subnet mask','AND',c.mask,'mask'],['Network','=',c.net,''],
-    ['Wildcard','OR',c.wild,''],['Broadcast','=',c.bc,'']
-  ];
-  $('#bin-rows').innerHTML = rows.map(([l,op,v,k])=>`<div class="brow"><div><div style="font-weight:600">${l}</div><div class="op">${op?op+' ↓':'&nbsp;'}</div></div><div class="bits ${k?'':'static'}" data-row="${k}"></div><div class="dec">${ipStr(v)}</div></div>`).join('');
-  $$('#bin-rows .bits').forEach((el,i)=>renderBits(el, rows[i][2], c.p, {static:!rows[i][3]}));
+/* ================= NUMBER CONVERSION ================= */
+const SUP = k => `<sup>${k}</sup>`;
+const HEXD = n => n.toString(16).toUpperCase();
+let cvVal = 200, cvMethod = 'sub';
+function parseBase(raw, base){
+  let s=String(raw).trim().toLowerCase().replace(/[\s,_]/g,'');
+  if(base===2){ s=s.replace(/^0b/,'').replace(/\./g,''); if(!/^[01]+$/.test(s)) return {error:'Binary uses only the digits 0 and 1.'}; if(s.length>32) return {error:'Keep binary to 32 bits or fewer.'}; return {n:parseInt(s,2)}; }
+  if(base===16){ s=s.replace(/^0x/,'').replace(/\./g,''); if(!/^[0-9a-f]+$/.test(s)) return {error:'Hexadecimal uses the digits 0–9 and the letters A–F.'}; if(s.length>8) return {error:'Keep hex to 8 digits (32 bits) or fewer.'}; return {n:parseInt(s,16)}; }
+  if(!/^\d+$/.test(s)) return {error:'Decimal uses only the digits 0–9.'};
+  const n=Number(s); if(n>MAX) return {error:'Keep decimal at 4,294,967,295 (32 bits) or less.'}; return {n};
 }
-$('#bin-rows').addEventListener('click',e=>{
-  const b=e.target.closest('.bit'); if(!b) return; const row=b.closest('.bits').dataset.row; const i=+b.dataset.i;
-  if(row==='ip') setCalc((state.ip ^ (2**(31-i)))>>>0, state.p);
-  else if(row==='mask') setCalc(state.ip, i+1===state.p ? i : i+1);
-});
-$('#bin-in').addEventListener('input',e=>{ const r=parseCIDR(e.target.value); e.target.classList.toggle('invalid',!!r.error); if(!r.error) setCalc(r.ip,r.p,{from:'bin-in'}); });
-$('#bin-prefix').addEventListener('input',e=>setCalc(state.ip,+e.target.value));
-$('#bin-export').onclick=()=>{ const c=calc(state.ip,state.p); openExport({title:`Binary view ${ipStr(c.ip)}/${c.p}`, table:{head:['Row','Binary','Decimal'], rows:[['IP address',binDots(c.ip),ipStr(c.ip)],['Subnet mask',binDots(c.mask),ipStr(c.mask)],['Network (IP AND mask)',binDots(c.net),ipStr(c.net)],['Wildcard',binDots(c.wild),ipStr(c.wild)],['Broadcast (network OR wildcard)',binDots(c.bc),ipStr(c.bc)]]}}); };
+const widthOf = n => n<=255 ? 8 : n<=65535 ? 16 : 32;
+const bitsOf = (n,w) => n.toString(2).padStart(w,'0');
+function renderConvert(from){
+  const bases={dec:10,bin:2,hex:16};
+  if(from){
+    const el=$('#cv-'+from);
+    if(el.value.trim()===''){ el.classList.remove('invalid'); $('#cv-err').hidden=true; return; }
+    const r=parseBase(el.value,bases[from]);
+    el.classList.toggle('invalid',!!r.error); $('#cv-err').hidden=!r.error; $('#cv-err').textContent=r.error||'';
+    if(r.error) return;
+    cvVal=r.n;
+  } else { $$('.cv-inputs input').forEach(i=>i.classList.remove('invalid')); $('#cv-err').hidden=true; }
+  const n=cvVal, w=widthOf(n), b=bitsOf(n,w);
+  if(from!=='dec') $('#cv-dec').value=String(n);
+  if(from!=='bin') $('#cv-bin').value=b.match(/.{8}/g).join(' ');
+  if(from!=='hex') $('#cv-hex').value=HEXD(n).padStart(w/4,'0');
 
-// octet converter
-const PLACES=[128,64,32,16,8,4,2,1];
-$('#oct-place').innerHTML = PLACES.map(v=>`<button type="button" data-v="${v}" aria-pressed="false"><small>${v}</small><b>0</b></button>`).join('');
-function renderOctet(n){
-  $$('#oct-place button').forEach(b=>{ const on=(n & +b.dataset.v)!==0; b.setAttribute('aria-pressed',on); $('b',b).textContent=on?1:0; });
-  $('#oct-bin').textContent=n.toString(2).padStart(8,'0'); $('#oct-hex').textContent='0x'+n.toString(16).toUpperCase().padStart(2,'0');
-  const parts=PLACES.filter(v=>n&v); $('#oct-sum').textContent = parts.length ? parts.join(' + ')+' = '+n : 'All bits off = 0';
+  // place values
+  let ph='';
+  for(let o=0;o<w/8;o++){
+    ph+='<div class="place">';
+    for(let j=0;j<8;j++){ const i=o*8+j, k=w-1-i, v=2**k, on=b[i]==='1';
+      ph+=`<button type="button" data-k="${k}" aria-pressed="${on}" title="2^${k} = ${fmt(v)}"><small>${w===8?v:'2'+SUP(k)}</small><b>${on?1:0}</b></button>`; }
+    ph+='</div>';
+  }
+  $('#oct-place').innerHTML=ph;
+
+  // decimal -> binary
+  let d2b='';
+  if(cvMethod==='sub'){
+    let rem=n, rows='';
+    for(let i=0;i<w;i++){ const k=w-1-i, v=2**k, fits=rem>=v;
+      rows+=`<tr><td class="mono r">${fmt(v)}</td><td class="mono r">${fmt(rem)}</td><td class="small">${fits?`${fmt(rem)} ≥ ${fmt(v)}, so subtract: ${fmt(rem)} − ${fmt(v)} = ${fmt(rem-v)}`:`${fmt(rem)} < ${fmt(v)}, so skip`}</td><td class="mono r ${fits?'on':''}">${fits?1:0}</td></tr>`;
+      if(fits) rem-=v; }
+    d2b=`<p class="note" style="margin-bottom:10px">Start at the largest place value. If what's left is at least that big, write 1 and subtract it. Otherwise write 0.</p><div class="tbl-wrap tbl-scroll" style="max-height:340px"><table><thead><tr><th class="r">Place</th><th class="r">Left</th><th>Step</th><th class="r">Bit</th></tr></thead><tbody>${rows}</tbody></table></div><p class="sum">Read the bits top to bottom: <b>${b}</b></p>`;
+  } else {
+    let x=n, rows=''; const list=[];
+    if(x===0) list.push([0,0,0]);
+    while(x>0){ list.push([x,Math.floor(x/2),x%2]); x=Math.floor(x/2); }
+    rows=list.map(([a,q,r])=>`<tr><td class="mono r">${fmt(a)} ÷ 2</td><td class="mono r">${fmt(q)}</td><td class="mono r on">${r}</td></tr>`).join('');
+    const raw=n.toString(2);
+    d2b=`<p class="note" style="margin-bottom:10px">Keep dividing by 2 and write down each remainder until the number reaches 0.</p><div class="tbl-wrap tbl-scroll" style="max-height:340px"><table><thead><tr><th class="r">Divide</th><th class="r">Result</th><th class="r">Remainder</th></tr></thead><tbody>${rows}</tbody></table></div><p class="sum">Read the remainders from bottom to top: <b>${raw}</b>${raw.length<w?`<br>Padded to ${w} bits: <b>${b}</b>`:''}</p>`;
+  }
+  $('#cv-d2b').innerHTML=d2b;
+
+  // binary -> decimal
+  let head='', bitsRow='';
+  for(let i=0;i<w;i++){ const k=w-1-i; head+=`<th class="r">${w===8?2**k:'2'+SUP(k)}</th>`; bitsRow+=`<td class="mono r ${b[i]==='1'?'on':''}">${b[i]}</td>`; }
+  const ones=[]; for(let i=0;i<w;i++) if(b[i]==='1') ones.push(2**(w-1-i));
+  $('#cv-b2d').innerHTML=`<div class="tbl-wrap"><table><thead><tr>${head}</tr></thead><tbody><tr>${bitsRow}</tr></tbody></table></div><p class="sum">${ones.length?`${ones.map(fmt).join(' + ')} = <b>${fmt(n)}</b>`:'No bits are on, so the value is <b>0</b>.'}</p>`;
+
+  // binary <-> hex
+  const groups=b.match(/.{4}/g);
+  $('#cv-b2h').innerHTML=`<div class="groups">${groups.map(g=>{ const v=parseInt(g,2); return `<div class="grp"><span>${g}</span><span class="muted">${[8,4,2,1].filter((p,i)=>g[i]==='1').join('+')||'0'} = ${v}</span><b>${HEXD(v)}</b></div>`; }).join('')}</div><p class="sum">Put the digits together: <b>${groups.map(g=>HEXD(parseInt(g,2))).join('')}</b> (written 0x${HEXD(n).padStart(w/4,'0')})</p>`;
+
+  // decimal <-> hex
+  let x=n; const hl=[]; if(x===0) hl.push([0,0,0]);
+  while(x>0){ hl.push([x,Math.floor(x/16),x%16]); x=Math.floor(x/16); }
+  const hx=HEXD(n), digits=hx.split('');
+  const terms=digits.map((d,i)=>`${d}${/[A-F]/.test(d)?` (${parseInt(d,16)})`:''} × 16${SUP(digits.length-1-i)}`);
+  const vals=digits.map((d,i)=>parseInt(d,16)*16**(digits.length-1-i));
+  $('#cv-d2h').innerHTML=`<p class="note" style="margin-bottom:10px"><b>Decimal → hex:</b> keep dividing by 16. Each remainder is a hex digit (10 = A … 15 = F).</p>
+    <div class="tbl-wrap"><table><thead><tr><th class="r">Divide</th><th class="r">Result</th><th class="r">Remainder</th><th class="r">Hex digit</th></tr></thead><tbody>${hl.map(([a,q,r])=>`<tr><td class="mono r">${fmt(a)} ÷ 16</td><td class="mono r">${fmt(q)}</td><td class="mono r">${r}</td><td class="mono r on">${HEXD(r)}</td></tr>`).join('')}</tbody></table></div>
+    <p class="sum">Read the digits from bottom to top: <b>${hx}</b></p>
+    <p class="note" style="margin-top:14px"><b>Hex → decimal:</b> multiply each digit by its power of 16 and add.</p>
+    <p class="sum">${terms.join(' + ')}<br>= ${vals.map(fmt).join(' + ')} = <b>${fmt(n)}</b></p>`;
 }
-$('#oct-place').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const n=(+$('#oct-dec').value||0) ^ +b.dataset.v; $('#oct-dec').value=n; renderOctet(n); });
-$('#oct-dec').addEventListener('input',e=>{ let n=Math.round(+e.target.value); if(!(n>=0&&n<=255)) { e.target.classList.add('invalid'); return; } e.target.classList.remove('invalid'); renderOctet(n); });
+$('#cv-dec').addEventListener('input',()=>renderConvert('dec'));
+$('#cv-bin').addEventListener('input',()=>renderConvert('bin'));
+$('#cv-hex').addEventListener('input',()=>renderConvert('hex'));
+$('#oct-place').addEventListener('click',e=>{ const b=e.target.closest('button[data-k]'); if(!b) return; cvVal=(cvVal ^ 2**(+b.dataset.k))>>>0; renderConvert(); });
+$('#cv-method').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; cvMethod=b.dataset.m; $$('#cv-method button').forEach(x=>x.setAttribute('aria-pressed',x===b)); renderConvert(); });
+function cvLoad(n){ cvVal=n; renderConvert(); $('#v-convert').scrollIntoView({behavior:'smooth',block:'start'}); }
+
+// IP address conversion
+function renderCvIP(){
+  const n=parseIP($('#cv-ip').value); $('#cv-ip').classList.toggle('invalid',n===null);
+  if(n===null) return;
+  const o=ipStr(n).split('.').map(Number);
+  $('#cv-ip-table').innerHTML='<thead><tr><th>Octet</th><th class="r">Decimal</th><th>Binary</th><th>Hex</th><th></th></tr></thead><tbody>'+
+    o.map((v,i)=>`<tr><td>${i+1}</td><td class="mono r">${v}</td><td class="mono">${bitsOf(v,8)}</td><td class="mono">${HEXD(v).padStart(2,'0')}</td><td><button class="btn ghost sm" data-load="${v}">Working</button></td></tr>`).join('')+'</tbody>';
+  $('#cv-ip-kv').innerHTML=[['Dotted decimal',ipStr(n)],['Dotted binary',binDots(n)],['Dotted hex',o.map(v=>HEXD(v).padStart(2,'0')).join('.')],['32-bit integer',String(n)],['Hex',hex(n)]]
+    .map(([k,v])=>`<div><dt>${k}</dt><dd class="copyable" title="Click to copy">${v}</dd></div>`).join('');
+}
+$('#cv-ip').addEventListener('input',renderCvIP);
+$('#cv-ip-table').addEventListener('click',e=>{ const b=e.target.closest('[data-load]'); if(b) cvLoad(+b.dataset.load); });
+$('#cv-ip-kv').addEventListener('click',e=>{ const d=e.target.closest('dd'); if(d) copyText(d.textContent,d); });
+
+// reference
+$('#cv-nibbles').innerHTML=Array.from({length:16},(_,v)=>`<button type="button" class="nib" data-load="${v}"><b>${HEXD(v)}</b><span>${bitsOf(v,4)}</span><span>${v}</span></button>`).join('');
+$('#cv-nibbles').addEventListener('click',e=>{ const b=e.target.closest('[data-load]'); if(b) cvLoad(+b.dataset.load); });
+$('#cv-masks').innerHTML='<thead><tr><th>Bits on</th>'+[0,1,2,3,4,5,6,7,8].map(k=>`<th class="r">${k}</th>`).join('')+'</tr></thead><tbody>'+
+  [['Decimal',v=>v],['Binary',v=>bitsOf(v,8)],['Hex',v=>HEXD(v).padStart(2,'0')]].map(([l,f])=>`<tr><td>${l}</td>${[0,1,2,3,4,5,6,7,8].map(k=>{ const v=k===0?0:(0xFF<<(8-k))&255; return `<td class="mono r">${f(v)}</td>`; }).join('')}</tr>`).join('')+'</tbody>';
+
+// drill
+const CV_TYPES=[['decimal','binary',10,2],['binary','decimal',2,10],['decimal','hexadecimal',10,16],['hexadecimal','decimal',16,10],['binary','hexadecimal',2,16],['hexadecimal','binary',16,2]];
+let cvs=Object.assign({correct:0,total:0,streak:0},LS.get('sc.convert',{}));
+let cq=null;
+const inBase=(n,base)=> base===2 ? bitsOf(n,8) : base===16 ? HEXD(n).padStart(2,'0') : String(n);
+function cvScore(){ $('#cv-score').textContent=`${cvs.correct}/${cvs.total} · streak ${cvs.streak}`; }
+function cvNewQ(){
+  const t=CV_TYPES[rnd(0,CV_TYPES.length-1)];
+  const pool=[0,128,192,224,240,248,252,254,255];
+  const n=Math.random()<.35 ? pool[rnd(0,pool.length-1)] : rnd(0,255);
+  cq={t,n,done:false};
+  $('#cv-prompt').innerHTML=`Convert <code>${inBase(n,t[2])}</code> from ${t[0]} to ${t[1]}.`;
+  $('#cv-ans').value=''; $('#cv-ans').disabled=false; $('#cv-check').disabled=false; $('#cv-ans').classList.remove('invalid');
+  $('#cv-ans').placeholder = t[3]===2?'e.g. 11000000':t[3]===16?'e.g. C0':'e.g. 192';
+  $('#cv-feedback').innerHTML='';
+}
+function cvWorking(n){
+  const b=bitsOf(n,8), ones=[]; for(let i=0;i<8;i++) if(b[i]==='1') ones.push(2**(7-i));
+  const hi=b.slice(0,4), lo=b.slice(4);
+  return `${ones.length?ones.join(' + ')+' = '+n:'No bits on = 0'}. Binary ${b}. Nibbles ${hi} = ${HEXD(parseInt(hi,2))} and ${lo} = ${HEXD(parseInt(lo,2))}, so hex ${HEXD(n).padStart(2,'0')}.`;
+}
+$('#cv-form').addEventListener('submit',e=>{
+  e.preventDefault();
+  if(!cq) return;
+  if(cq.done){ cvNewQ(); $('#cv-ans').focus(); return; }
+  const r=parseBase($('#cv-ans').value,cq.t[3]);
+  if($('#cv-ans').value.trim()===''||r.error){ $('#cv-ans').classList.add('invalid'); $('#cv-feedback').innerHTML=`<div class="feedback bad">${esc(r.error||'Type an answer first.')}</div>`; return; }
+  const ok=r.n===cq.n; cq.done=true; cvs.total++; if(ok){ cvs.correct++; cvs.streak++; } else cvs.streak=0; LS.set('sc.convert',cvs); cvScore();
+  $('#cv-ans').disabled=true; $('#cv-check').disabled=true;
+  $('#cv-feedback').innerHTML=`<div class="feedback ${ok?'ok':'bad'}"><div style="margin-bottom:6px">${ok?'<strong>Correct.</strong>':`<strong>Not quite.</strong> The answer is <b>${inBase(cq.n,cq.t[3])}</b>.`}</div><div>${esc(cvWorking(cq.n))}</div><button class="btn sm" type="button" data-load="${cq.n}" style="margin-top:8px">Show full working</button></div>`;
+  $('#cv-next').focus();
+});
+$('#cv-next').onclick=()=>{ cvNewQ(); $('#cv-ans').focus(); };
+$('#cv-feedback').addEventListener('click',e=>{ const b=e.target.closest('[data-load]'); if(b) cvLoad(+b.dataset.load); });
 
 /* ================= MASKS ================= */
 let maskP = 22;
@@ -1245,10 +1400,11 @@ $('#saved-export').onclick=()=>{
 };
 
 /* ================= routing ================= */
-const VIEWS=['calc','binary','masks','equal','vlsm','practice','saved'];
+const VIEWS=['calc','convert','masks','equal','vlsm','practice','saved'];
 let currentView='calc';
 function go(v){ if(location.hash!=='#'+v) location.hash=v; else show(v); }
 function show(v){
+  if(v==='binary') v='convert';
   if(!VIEWS.includes(v)) v='calc'; currentView=v;
   $$('.view').forEach(s=>s.hidden = s.dataset.view!==v);
   $$('.tab').forEach(t=>t.setAttribute('aria-selected', t.dataset.view===v));
@@ -1263,8 +1419,7 @@ window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
 /* ================= boot ================= */
 (function boot(){
   const r=parseCIDR($('#calc-in').value); state.ip=r.ip; state.p=r.p;
-  $('#bin-in').value=ipStr(state.ip)+'/'+state.p;
-  renderCalc(); renderBinary(); renderOctet(192); renderMask();
+  renderCalc(); renderConvert(); renderCvIP(); cvNewQ(); cvScore(); renderMask();
   renderEqual(); renderVRows(); renderVLSM();
   renderPracticeSettings(); renderScore(); newQ(); wsNew();
   renderHistory(); renderRecent(); renderSaved();

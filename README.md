@@ -5,7 +5,7 @@ An IPv4 subnet calculator and subnetting practice tool in a single static page.
 ## Features
 
 - Subnet calculator: network, broadcast, host range, usable hosts, mask, wildcard, class, address type, reverse DNS zone
-- Binary view (IP AND mask, network OR wildcard) plus an octet converter
+- Number conversion: decimal, binary and hexadecimal with step-by-step working, IP address conversion and a drill
 - Mask converter (prefix, mask, wildcard or host count) and a /0-/32 reference table
 - Equal subnetting by number of subnets or hosts per subnet
 - VLSM planner with an address-space map and free blocks

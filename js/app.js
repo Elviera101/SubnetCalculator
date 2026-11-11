@@ -8,18 +8,7 @@ const PAGE_META = {
     'Subnet calculator',
     'Type an address with a prefix or mask, like 192.168.10.77/26.'
   ],
-  convert: [
-    'Calculate',
-    'Number conversion',
-    'Convert between decimal, binary and hexadecimal, with the working shown.'
-  ],
-  masks: [
-    'Calculate',
-    'Mask converter',
-    'Turn a prefix, mask, wildcard or host count into every other form.'
-  ],
   vlsm: ['Plan', 'VLSM planner', 'Fit subnets of different sizes into one address block.'],
-  practice: ['Learn', 'Practice', 'Drill subnetting with a worksheet or quick questions.'],
   saved: ['Library', 'Saved & history', 'Reopen saved calculations and recent work.']
 };
 // Buttons each page shows in the header.
@@ -57,7 +46,7 @@ function setNav(open) {
 $('#menu-btn').onclick = () => setNav(true);
 $('#scrim').onclick = () => setNav(false);
 // Main input for each page (used by the / shortcut).
-const FOCUS = { calc: '#calc-in', convert: '#cv-dec', masks: '#mask-in', vlsm: '#v-base' };
+const FOCUS = { calc: '#calc-in', vlsm: '#v-base' };
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && $('.app').classList.contains('nav-open')) {
     setNav(false);
@@ -71,15 +60,7 @@ document.addEventListener('keydown', e => {
     !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) &&
     $('#modal').hidden
   ) {
-    let el = null;
-    if (currentView === 'practice') {
-      if (pr.mode === 'sheet') {
-        e.preventDefault();
-        wsFocusFirst();
-        return;
-      }
-      el = $('#pr-answer');
-    } else if (FOCUS[currentView]) el = $(FOCUS[currentView]);
+    const el = FOCUS[currentView] ? $(FOCUS[currentView]) : null;
     if (el && !el.disabled) {
       e.preventDefault();
       el.focus();
@@ -111,7 +92,7 @@ document.addEventListener('keydown', e => {
 
 /* ================= routing ================= */
 // Valid page names for the address bar (#calc, #vlsm, ...).
-const VIEWS = ['calc', 'convert', 'masks', 'vlsm', 'practice', 'saved'];
+const VIEWS = ['calc', 'vlsm', 'saved'];
 let currentView = 'calc';
 // Navigates to a page by changing the URL hash.
 function go(v) {
@@ -120,7 +101,6 @@ function go(v) {
 }
 // Shows one page, hides the others and updates the sidebar.
 function show(v) {
-  if (v === 'binary') v = 'convert';
   if (!VIEWS.includes(v)) v = 'calc';
   currentView = v;
   const changed = currentView !== v || !$('#v-' + v) || $('#v-' + v).hidden;
@@ -131,10 +111,6 @@ function show(v) {
     else t.removeAttribute('aria-current');
   });
   setChrome(v);
-  if (v === 'practice') {
-    if (pr.mode === 'sheet') wsFocusFirst();
-    else if (q && !q.done && q.kind !== 'yn') $('#pr-answer').focus({ preventScroll: true });
-  }
   if (v === 'saved') {
     renderHistory();
     renderSaved();
@@ -162,17 +138,8 @@ window.addEventListener('hashchange', () => show(location.hash.slice(1)));
   state.ip = r.ip;
   state.p = r.p;
   renderCalc();
-  renderConvert();
-  renderCvIP();
-  cvNewQ();
-  cvScore();
-  renderMask();
   renderVRows();
   renderVLSM();
-  renderPracticeSettings();
-  renderScore();
-  newQ();
-  wsNew();
   renderHistory();
   renderRecent();
   renderSaved();

@@ -1,6 +1,6 @@
 # SubnetCalculator
 
-An IPv4 subnet calculator and subnetting practice tool in a single static page.
+An IPv4 subnet calculator and subnetting practice tool. Plain HTML, CSS and JavaScript with no build step.
 
 ## Features
 
@@ -11,5 +11,25 @@ An IPv4 subnet calculator and subnetting practice tool in a single static page.
 - Practice: a subnet worksheet (network, first host, last host, broadcast, next subnet) and a quick quiz
 - Saved calculations and history, stored in your browser
 - Export to CSV, Markdown, text or a printable report, and print
+
+## Project structure
+
+```
+index.html          Page markup: sidebar, header and one <section> per tool
+css/styles.css      All styles, with light and dark theme tokens at the top
+js/ipv4.js          IPv4 math: parsing, masks, subnet calculation
+js/helpers.js       DOM shortcuts, formatting, local storage, toast, clipboard, bit ribbon
+js/storage.js       History (this browser) and saved calculations
+js/export.js        Dialogs and export formats (CSV, Markdown, text, HTML report)
+js/calculator.js    Subnet calculator page
+js/convert.js       Number conversion page
+js/masks.js         Mask converter page
+js/vlsm.js          VLSM planner page
+js/practice.js      Practice page: quick quiz and subnet worksheet
+js/saved.js         Saved & history page
+js/app.js           Sidebar, page header, theme, routing and start-up
+```
+
+The scripts are plain (non-module) files that share one global scope, so they must load in the order listed in `index.html`. `app.js` goes last because it starts the app.
 
 Open `index.html` in a browser or visit the GitHub Pages site. No build step or server is needed.

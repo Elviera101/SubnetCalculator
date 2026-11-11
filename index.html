@@ -113,7 +113,6 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
 /* calculator hero */
 .hero{background:var(--hero);color:var(--hero-ink);border-radius:12px;padding:22px 26px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:18px 32px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
-.hero::after{content:"";position:absolute;right:-70px;top:-130px;width:320px;height:320px;border-radius:50%;border:64px solid rgba(255,255,255,.04);pointer-events:none}
 .hero .eyebrow{color:var(--hero-accent)}
 .hero-main{position:relative;z-index:1;min-width:0}
 .hero-cidr{display:flex;align-items:baseline;gap:8px;font-family:var(--f-mono);margin-top:4px;flex-wrap:wrap}
@@ -263,6 +262,19 @@ td.on{background:var(--net-soft);font-weight:600}
 .nib b{font-family:var(--f-mono);font-size:1.25rem;color:var(--net)}
 .nib span{font-family:var(--f-mono);font-size:.78rem;color:var(--muted)}
 
+/* mask converter */
+.mk-kind{margin-right:4px;min-width:5.6em;text-align:center;background:var(--net);color:var(--net-ink)}
+.mk-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.mk-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{display:grid;gap:4px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;cursor:copy;box-shadow:var(--shadow);min-width:0}
+.tile b{font-family:var(--f-mono);font-size:1.25rem;font-weight:600;overflow-wrap:anywhere}
+.tile small{font-size:.75rem;color:var(--muted)}
+.tile:hover{border-color:var(--net)}
+.tile:hover small{color:var(--net)}
+.tile.lead{background:var(--hero);border-color:var(--hero);color:var(--hero-ink)}
+.tile.lead .label,.tile.lead small{color:var(--hero-muted)}
+#mask-table-wrap{position:relative}
+
 /* vlsm */
 .vrows{display:grid;gap:8px}
 .vrow{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;gap:8px;align-items:center}
@@ -378,7 +390,7 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
     </div>
     <div class="hero" id="calc-hero"></div>
     <div class="panel">
-      <div class="panel-head"><h3>All details</h3><span class="small muted">Click a value to copy it</span></div>
+      <div class="panel-head"><h3>Details</h3><span class="small muted">Click a value to copy it. Export includes binary, hex and more.</span></div>
       <dl class="kv" id="calc-kv"></dl>
     </div>
   </section>
@@ -450,21 +462,35 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
 
   <!-- MASKS -->
   <section class="view" id="v-masks" data-view="masks" hidden>
+    <div class="panel mk-main">
+      <label class="label" for="mask-in" style="display:block;margin-bottom:7px">Prefix, subnet mask, wildcard or host count</label>
+      <div class="cv-box"><span class="cv-tag mk-kind" id="mask-kind">MASK</span><input type="text" id="mask-in" value="255.255.252.0" spellcheck="false" autocomplete="off"></div>
+      <p class="small muted" id="mask-detected" style="margin-top:8px"></p>
+      <p class="err" id="mask-err" hidden></p>
+      <div class="chips cv-examples" id="mask-examples"><span class="label">Try</span></div>
+      <div class="field" style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;gap:10px"><label class="label" for="mask-slider">Prefix length</label><span class="mono small" id="mask-slider-out"></span></div>
+        <input type="range" id="mask-slider" min="0" max="32" value="22">
+      </div>
+    </div>
+
+    <div class="mk-tiles" id="mask-tiles"></div>
+
     <div class="cols-even">
       <div class="panel">
-        <h3 style="margin-bottom:4px">Convert a mask</h3>
-        <p class="muted small" style="margin-bottom:12px">Type a prefix (<span class="mono">/22</span>), a subnet mask (<span class="mono">255.255.252.0</span>), a wildcard (<span class="mono">0.0.3.255</span>) or a host count (<span class="mono">500 hosts</span>).</p>
-        <input type="text" class="big" id="mask-in" value="255.255.252.0" spellcheck="false" autocomplete="off">
-        <p class="small muted" id="mask-detected" style="margin-top:8px"></p>
-        <p class="err" id="mask-err" hidden></p>
+        <div class="panel-head"><h3>Mask in binary</h3><div class="legend"><span style="--c:var(--net)">Network</span><span style="--c:var(--host)">Host</span></div></div>
+        <div class="bits static" id="mask-bits"></div>
+        <p class="note" id="mask-block" style="margin-top:14px"></p>
       </div>
       <div class="panel">
+        <div class="panel-head"><h3>More formats</h3><span class="small muted">Click a value to copy it</span></div>
         <dl class="kv" id="mask-kv" style="grid-template-columns:minmax(0,1fr)"></dl>
       </div>
     </div>
+
     <div class="panel">
-      <div class="panel-head"><div><h3>Prefix reference</h3><p class="muted small">Click a row to convert it.</p></div><button class="btn" id="mask-export">Export table</button></div>
-      <div class="tbl-wrap tbl-scroll"><table id="mask-table"></table></div>
+      <div class="panel-head"><div><h3>Prefix reference</h3><p class="muted small">Every prefix from /32 to /0. Click a row to convert it.</p></div><button class="btn" id="mask-export">Export table</button></div>
+      <div class="tbl-wrap tbl-scroll" id="mask-table-wrap"><table id="mask-table"></table></div>
     </div>
   </section>
 
@@ -899,14 +925,23 @@ function calcKV(){
     ['IP in binary', binDots(c.ip)], ['Mask in binary', binDots(c.mask)],
   ];
 }
+function calcKVShort(){
+  const c=calc(state.ip,state.p);
+  return [
+    ['Subnet mask', ipStr(c.mask)], ['Wildcard mask', ipStr(c.wild)],
+    ['First usable host', ipStr(c.first)], ['Last usable host', ipStr(c.last)],
+    ['Broadcast address', ipStr(c.bc)], ['Total addresses', fmt(c.size)],
+    ['Previous subnet', c.prev===null?'—':ipStr(c.prev)+'/'+c.p], ['Next subnet', c.next===null?'—':ipStr(c.next)+'/'+c.p],
+  ];
+}
 function renderCalc(){
   const c=calc(state.ip,state.p);
   $('#calc-prefix').value=c.p;
   $('#calc-prefix-out').textContent=`/${c.p} · ${ipStr(c.mask)}`;
   renderBits($('#calc-bits'), c.ip, c.p);
   const range = (c.p>=31 || (c.first>>>8)!==(c.last>>>8)) ? `${ipStr(c.first)} – ${ipStr(c.last)}` : `${ipStr(c.first)} – .${c.last&255}`;
-  $('#calc-hero').innerHTML = `<div class="hero-main"><span class="eyebrow">Network</span><div class="hero-cidr"><strong>${ipStr(c.net)}</strong><span>/${c.p}</span></div><p>Hosts ${range} · Broadcast ${ipStr(c.bc)}</p><div class="hero-tags"><span>Mask ${ipStr(c.mask)}</span><span>Class ${esc(classOf(c.ip))}</span><span>${esc(typeOf(c.ip))}</span></div></div><div class="hero-hosts"><span>Usable hosts</span><strong>${fmt(c.usable)}</strong><small>${fmt(c.size)} total addresses</small></div>`;
-  $('#calc-kv').innerHTML = calcKV().map(([k,v])=>`<div><dt>${k}</dt><dd class="copyable" title="Click to copy">${esc(v)}</dd></div>`).join('');
+  $('#calc-hero').innerHTML = `<div class="hero-main"><span class="eyebrow">Network</span><div class="hero-cidr"><strong>${ipStr(c.net)}</strong><span>/${c.p}</span></div><p>Hosts ${range} · Broadcast ${ipStr(c.bc)}</p><div class="hero-tags"><span>Mask ${ipStr(c.mask)}</span><span>Class ${esc(classOf(c.ip))}</span></div></div><div class="hero-hosts"><span>Usable hosts</span><strong>${fmt(c.usable)}</strong><small>${fmt(c.size)} total addresses</small></div>`;
+  $('#calc-kv').innerHTML = calcKVShort().map(([k,v])=>`<div><dt>${k}</dt><dd class="copyable" title="Click to copy">${esc(v)}</dd></div>`).join('');
 }
 $('#calc-in').addEventListener('input',e=>{
   const r=parseCIDR(e.target.value);
@@ -1096,18 +1131,42 @@ function maskKV(p){
   const per24 = p<=24 ? `${fmt(2**(24-p))} × /24` : `1/${2**(p-24)} of a /24`;
   return [['CIDR prefix','/'+p],['Subnet mask',ipStr(m)],['Wildcard mask',ipStr(w)],['Mask in binary',binDots(m)],['Mask in hex',hex(m)],['Total addresses',fmt(2**(32-p))],['Usable hosts',fmt(usableOf(p))],['Network bits / host bits',`${p} / ${32-p}`],['Size in /24 blocks',per24]];
 }
+function maskKind(r){ return /CIDR/.test(r.from)?'CIDR':/hosts/.test(r.from)?'HOSTS':/wildcard/.test(r.from)?'WILDCARD':'MASK'; }
+function maskBlockNote(p){
+  if(p===0) return 'A /0 covers every IPv4 address.';
+  if(p===32) return 'A /32 is a single address, often used for one host or a loopback.';
+  if(p%8===0) return `/${p} ends on an octet boundary. Each subnet is ${fmt(2**(32-p))} addresses, so network addresses step by 1 in octet ${p/8}.`;
+  const k=Math.floor(p/8), mo=(maskOf(p)>>>(24-8*k))&255, blk=256-mo;
+  const starts=[]; for(let v=0; v<256 && starts.length<4; v+=blk) starts.push(v);
+  return `Octet ${k+1} is the interesting octet (${mo}). Block size = 256 − ${mo} = ${blk}, so networks start at ${starts.join(', ')}${256/blk>4?` … ${256-blk}`:''} in that octet.`;
+}
 function renderMask(){
+  const box=$('#mask-in').closest('.cv-box');
   const r=parseMaskAny($('#mask-in').value);
-  $('#mask-in').classList.toggle('invalid',!!r.error); $('#mask-err').hidden=!r.error; $('#mask-err').textContent=r.error||'';
+  box.classList.toggle('invalid',!!r.error); $('#mask-err').hidden=!r.error; $('#mask-err').textContent=r.error||'';
   if(r.error) return;
-  maskP=r.p; $('#mask-detected').textContent=r.from+'.';
-  $('#mask-kv').innerHTML = maskKV(r.p).map(([k,v])=>`<div><dt>${k}</dt><dd class="copyable" title="Click to copy">${esc(v)}</dd></div>`).join('');
-  $$('#mask-table tbody tr').forEach(tr=>tr.classList.toggle('sel', +tr.dataset.p===r.p));
+  const p=r.p, m=maskOf(p), w=wildOf(p); maskP=p;
+  $('#mask-kind').textContent=maskKind(r); $('#mask-detected').textContent=r.from+'.';
+  $('#mask-slider').value=p; $('#mask-slider-out').textContent=`/${p} · ${ipStr(m)}`;
+  $('#mask-tiles').innerHTML=[['Prefix','/'+p],['Subnet mask',ipStr(m)],['Wildcard mask',ipStr(w)],['Usable hosts',fmt(usableOf(p))]]
+    .map(([k,v],i)=>`<button type="button" class="tile${i===0?' lead':''}" data-copy="${v}"><span class="label">${k}</span><b>${v}</b><small>Click to copy</small></button>`).join('');
+  renderBits($('#mask-bits'), m, p, {static:true});
+  $('#mask-block').textContent=maskBlockNote(p);
+  $('#mask-kv').innerHTML = maskKV(p).filter(([k])=>!['CIDR prefix','Subnet mask','Wildcard mask','Usable hosts'].includes(k))
+    .map(([k,v])=>`<div><dt>${k}</dt><dd class="copyable" title="Click to copy">${esc(v)}</dd></div>`).join('');
+  $$('#mask-table tbody tr').forEach(tr=>tr.classList.toggle('sel', +tr.dataset.p===p));
+  const sel=$(`#mask-table tr[data-p="${p}"]`), wrap=$('#mask-table-wrap');
+  if(sel && wrap) wrap.scrollTop = Math.max(0, sel.offsetTop - wrap.clientHeight/2 + sel.offsetHeight/2);
 }
 function maskTableRows(){ const rows=[]; for(let p=32;p>=0;p--) rows.push(['/'+p, ipStr(maskOf(p)), ipStr(wildOf(p)), fmt(2**(32-p)), fmt(usableOf(p))]); return rows; }
 $('#mask-table').innerHTML = '<thead><tr><th>Prefix</th><th>Subnet mask</th><th>Wildcard</th><th class="r">Addresses</th><th class="r">Usable hosts</th></tr></thead><tbody>' +
   maskTableRows().map(r=>`<tr class="click" data-p="${r[0].slice(1)}"><td class="mono">${r[0]}</td><td class="mono">${r[1]}</td><td class="mono">${r[2]}</td><td class="mono r">${r[3]}</td><td class="mono r">${r[4]}</td></tr>`).join('') + '</tbody>';
-$('#mask-table').addEventListener('click',e=>{ const tr=e.target.closest('tr[data-p]'); if(!tr) return; $('#mask-in').value=ipStr(maskOf(+tr.dataset.p)); renderMask(); window.scrollTo({top:0,behavior:'smooth'}); });
+$('#mask-table').addEventListener('click',e=>{ const tr=e.target.closest('tr[data-p]'); if(!tr) return; $('#mask-in').value='/'+tr.dataset.p; renderMask(); $('.mk-main').scrollIntoView({behavior:'smooth',block:'start'}); });
+$('#mask-slider').addEventListener('input',e=>{ $('#mask-in').value='/'+e.target.value; renderMask(); });
+$('#mask-tiles').addEventListener('click',e=>{ const t=e.target.closest('[data-copy]'); if(t) copyText(t.dataset.copy, t.querySelector('b')); });
+const MASK_EXAMPLES=['/8','/16','/24','/26','/30','255.255.240.0','0.0.0.63','500 hosts'];
+$('#mask-examples').insertAdjacentHTML('beforeend', MASK_EXAMPLES.map(v=>`<button type="button" data-mex="${v}">${v}</button>`).join(''));
+$('#mask-examples').addEventListener('click',e=>{ const b=e.target.closest('[data-mex]'); if(!b) return; $('#mask-in').value=b.dataset.mex; renderMask(); });
 $('#mask-in').addEventListener('input',renderMask);
 $('#mask-kv').addEventListener('click',e=>{ const d=e.target.closest('dd'); if(d) copyText(d.textContent,d); });
 $('#mask-export').onclick=()=>openExport({title:'IPv4 prefix reference', table:{head:['Prefix','Subnet mask','Wildcard','Addresses','Usable hosts'], rows:maskTableRows()}});

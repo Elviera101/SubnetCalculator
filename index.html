@@ -211,6 +211,35 @@ tr.click{cursor:pointer}
 .empty{padding:18px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:8px;font-size:.9rem}
 
 /* number conversion */
+.cv-field label{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.9rem;margin-bottom:7px}
+.cv-field label small{font-weight:400;color:var(--muted);font-size:.8rem}
+.cv-tag{font-family:var(--f-mono);font-size:.68rem;font-weight:600;letter-spacing:.06em;padding:2px 7px;border-radius:5px;background:var(--sunken);color:var(--muted)}
+.cv-field.src .cv-tag{background:var(--net);color:var(--net-ink)}
+.cv-box{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding-left:12px;min-width:0}
+.cv-box:focus-within{border-color:var(--net);box-shadow:0 0 0 3px var(--net-soft)}
+.cv-box.invalid{border-color:var(--bad);box-shadow:0 0 0 3px var(--bad-soft)}
+.cv-box .pre{font-family:var(--f-mono);color:var(--muted);font-size:1rem}
+.cv-box input{border:0;background:none;font-family:var(--f-mono);font-size:1.25rem;padding:12px 6px;flex:1;min-width:0;width:100%;border-radius:0}
+.cv-box input:focus-visible{outline:none}
+.cv-copy{border:0;border-left:1px solid var(--line);background:none;color:var(--muted);padding:0 12px;cursor:pointer;font-size:.8rem;align-self:stretch;border-radius:0 10px 10px 0}
+.cv-copy:hover{color:var(--ink);background:var(--sunken)}
+.cv-examples{margin-top:14px;align-items:center}
+.cv-examples .label{margin-right:4px}
+.cv-bits{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+.cv-bits-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.cv-tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);margin-bottom:16px}
+.cv-tabs button{border:0;background:none;padding:9px 12px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;cursor:pointer;font-weight:500}
+.cv-tabs button:hover{color:var(--ink)}
+.cv-tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--net)}
+.work-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:760px){.work-grid{grid-template-columns:minmax(0,1fr)}}
+.work-steps{margin:0;padding-left:20px;display:grid;gap:8px;font-size:.92rem}
+.work-steps li::marker{color:var(--net);font-weight:700}
+tr.hit td{background:var(--net-soft)}
+tr.skip td{color:var(--muted)}
+.cv-answer{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;margin-top:14px;padding:12px 14px;background:var(--sunken);border-radius:8px}
+.cv-answer b{font-family:var(--f-mono);font-size:1.3rem;color:var(--net);overflow-wrap:anywhere}
+
 .cv-inputs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 @media (max-width:760px){.cv-inputs{grid-template-columns:minmax(0,1fr)}}
 .place-rows{display:grid;gap:6px}
@@ -301,7 +330,6 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
       <button class="nav-item" data-view="convert"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 12 4 4-4 4"/><path d="M21 16H7"/></svg><span>Number conversion</span></button>
       <button class="nav-item" data-view="masks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>Mask converter</span></button>
       <p class="nav-group">Plan</p>
-      <button class="nav-item" data-view="equal"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18M3 12h18"/></svg><span>Equal subnets</span></button>
       <button class="nav-item" data-view="vlsm"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 10h18M10 10v11M10 15.5h11"/></svg><span>VLSM planner</span></button>
       <p class="nav-group">Learn</p>
       <button class="nav-item" data-view="practice"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><span>Practice</span></button>
@@ -353,57 +381,55 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
       <div class="panel-head"><h3>All details</h3><span class="small muted">Click a value to copy it</span></div>
       <dl class="kv" id="calc-kv"></dl>
     </div>
-    <div class="panel">
-      <div class="panel-head"><h3>Does this subnet contain an address?</h3></div>
-      <div class="row">
-        <div class="field grow"><label class="label" for="calc-check">Address to check</label><input type="text" id="calc-check" class="mono" value="192.168.10.130" spellcheck="false"></div>
-        <div id="calc-check-out" style="padding-bottom:9px"></div>
-      </div>
-    </div>
   </section>
 
   <!-- CONVERT -->
   <section class="view" id="v-convert" data-view="convert" hidden>
-    <div class="panel">
+    <div class="panel cv-main">
       <div class="cv-inputs">
-        <div class="field"><label class="label" for="cv-dec">Decimal · base 10</label><input type="text" class="big" id="cv-dec" value="200" inputmode="numeric" spellcheck="false" autocomplete="off"></div>
-        <div class="field"><label class="label" for="cv-bin">Binary · base 2</label><input type="text" class="big" id="cv-bin" spellcheck="false" autocomplete="off"></div>
-        <div class="field"><label class="label" for="cv-hex">Hexadecimal · base 16</label><input type="text" class="big" id="cv-hex" spellcheck="false" autocomplete="off"></div>
+        <div class="cv-field" data-base="dec">
+          <label for="cv-dec"><span class="cv-tag">DEC</span>Decimal <small>base 10</small></label>
+          <div class="cv-box"><input type="text" id="cv-dec" value="200" inputmode="numeric" spellcheck="false" autocomplete="off"><button type="button" class="cv-copy" data-copy="dec" aria-label="Copy decimal value">Copy</button></div>
+        </div>
+        <div class="cv-field" data-base="bin">
+          <label for="cv-bin"><span class="cv-tag">BIN</span>Binary <small>base 2</small></label>
+          <div class="cv-box"><span class="pre" aria-hidden="true">0b</span><input type="text" id="cv-bin" inputmode="numeric" spellcheck="false" autocomplete="off"><button type="button" class="cv-copy" data-copy="bin" aria-label="Copy binary value">Copy</button></div>
+        </div>
+        <div class="cv-field" data-base="hex">
+          <label for="cv-hex"><span class="cv-tag">HEX</span>Hexadecimal <small>base 16</small></label>
+          <div class="cv-box"><span class="pre" aria-hidden="true">0x</span><input type="text" id="cv-hex" spellcheck="false" autocomplete="off"><button type="button" class="cv-copy" data-copy="hex" aria-label="Copy hexadecimal value">Copy</button></div>
+        </div>
       </div>
       <p class="err" id="cv-err" hidden></p>
-      <div class="field" style="margin-top:16px"><span class="label">Place values · click a bit to flip it</span><div class="place-rows" id="oct-place"></div></div>
+      <div class="chips cv-examples" id="cv-examples"><span class="label">Try</span></div>
+      <div class="cv-bits">
+        <div class="cv-bits-head"><span class="label">Place values · click a bit to flip it</span><span class="chip" id="cv-width"></span></div>
+        <div class="place-rows" id="oct-place"></div>
+        <p class="sum" id="cv-sum"></p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><div><h3>Show the working</h3><p class="muted small">The method follows the box you type in. Pick another any time.</p></div></div>
+      <div class="cv-tabs" role="tablist" aria-label="Conversion method" id="cv-tabs">
+        <button type="button" role="tab" data-w="d2b">Decimal → binary</button>
+        <button type="button" role="tab" data-w="b2d">Binary → decimal</button>
+        <button type="button" role="tab" data-w="b2h">Binary ↔ hex</button>
+        <button type="button" role="tab" data-w="d2h">Decimal → hex</button>
+        <button type="button" role="tab" data-w="h2d">Hex → decimal</button>
+      </div>
+      <div id="cv-work" role="tabpanel"></div>
     </div>
 
     <div class="cols-even">
       <div class="panel">
-        <div class="panel-head"><h3>Decimal → binary</h3><div class="seg" id="cv-method"><button data-m="sub" aria-pressed="true">Subtract place values</button><button data-m="div" aria-pressed="false">Divide by 2</button></div></div>
-        <div id="cv-d2b"></div>
-      </div>
-      <div class="panel">
-        <div class="panel-head"><h3>Binary → decimal</h3></div>
-        <p class="note" style="margin-bottom:10px">Write the place value over each bit, then add up the places that hold a 1.</p>
-        <div id="cv-b2d"></div>
-      </div>
-      <div class="panel">
-        <div class="panel-head"><h3>Binary ↔ hexadecimal</h3></div>
-        <p class="note" style="margin-bottom:10px">Split the bits into groups of four (nibbles) from the right. Each nibble is one hex digit, using the 8 4 2 1 place values inside it.</p>
-        <div id="cv-b2h"></div>
-      </div>
-      <div class="panel">
-        <div class="panel-head"><h3>Decimal ↔ hexadecimal</h3></div>
-        <div id="cv-d2h"></div>
-      </div>
-    </div>
-
-    <div class="cols-even">
-      <div class="panel">
-        <div class="panel-head"><div><h3>Convert an IP address</h3><p class="muted small">Each octet is converted on its own.</p></div></div>
-        <input type="text" class="mono" id="cv-ip" value="192.168.1.10" spellcheck="false" autocomplete="off" aria-label="IP address to convert">
+        <div class="panel-head"><div><h3>Convert an IP address</h3><p class="muted small">Each octet converts on its own. Pick an octet to see its working.</p></div></div>
+        <div class="cv-box"><input type="text" id="cv-ip" value="192.168.1.10" spellcheck="false" autocomplete="off" aria-label="IP address to convert"></div>
         <div class="tbl-wrap" style="margin-top:12px"><table id="cv-ip-table"></table></div>
         <dl class="kv" id="cv-ip-kv" style="grid-template-columns:minmax(0,1fr);margin-top:8px"></dl>
       </div>
       <div class="panel">
-        <div class="panel-head"><h3>Conversion drill</h3><span class="mono small muted" id="cv-score"></span></div>
+        <div class="panel-head"><h3>Conversion drill</h3><span class="chip" id="cv-score"></span></div>
         <p class="qprompt" id="cv-prompt" style="font-size:1.15rem"></p>
         <form id="cv-form" class="row" style="margin-top:14px" autocomplete="off">
           <div class="field grow"><label class="label" for="cv-ans">Your answer</label><input type="text" class="mono" id="cv-ans" spellcheck="false"></div>
@@ -439,26 +465,6 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
     <div class="panel">
       <div class="panel-head"><div><h3>Prefix reference</h3><p class="muted small">Click a row to convert it.</p></div><button class="btn" id="mask-export">Export table</button></div>
       <div class="tbl-wrap tbl-scroll"><table id="mask-table"></table></div>
-    </div>
-  </section>
-
-  <!-- EQUAL -->
-  <section class="view" id="v-equal" data-view="equal" hidden>
-    <div class="panel">
-      <div class="panel-head"><h3>Divide a network</h3><div class="row"><button class="btn primary" id="eq-save">Save</button><button class="btn" id="eq-export">Export</button></div></div>
-      <div class="row">
-        <div class="field grow"><label class="label" for="eq-net">Network to divide</label><input type="text" class="mono" id="eq-net" value="172.16.0.0/22" spellcheck="false"></div>
-        <div class="field"><span class="label">Divide by</span><div class="seg" id="eq-mode"><button data-mode="subnets" aria-pressed="true">Number of subnets</button><button data-mode="hosts" aria-pressed="false">Hosts per subnet</button></div></div>
-        <div class="field" style="width:150px"><label class="label" for="eq-val" id="eq-val-label">Subnets needed</label><input type="number" class="mono" id="eq-val" value="6" min="1"></div>
-      </div>
-      <p class="err" id="eq-err" hidden></p>
-      <p class="note" id="eq-note" style="margin-top:8px"></p>
-    </div>
-    <div class="panel" id="eq-out-panel">
-      <div class="hero-nums" id="eq-hero"></div>
-      <div class="field" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;gap:6px 12px;flex-wrap:wrap"><span class="label">Prefix split</span><div class="legend"><span style="--c:var(--net)">Original network</span><span style="--c:var(--sub)">Borrowed</span><span style="--c:var(--host)">Host</span></div></div><div class="bits static" id="eq-bits"></div></div>
-      <div class="tbl-wrap tbl-scroll"><table id="eq-table"></table></div>
-      <p class="note" id="eq-more" style="margin-top:8px"></p>
     </div>
   </section>
 
@@ -901,17 +907,6 @@ function renderCalc(){
   const range = (c.p>=31 || (c.first>>>8)!==(c.last>>>8)) ? `${ipStr(c.first)} – ${ipStr(c.last)}` : `${ipStr(c.first)} – .${c.last&255}`;
   $('#calc-hero').innerHTML = `<div class="hero-main"><span class="eyebrow">Network</span><div class="hero-cidr"><strong>${ipStr(c.net)}</strong><span>/${c.p}</span></div><p>Hosts ${range} · Broadcast ${ipStr(c.bc)}</p><div class="hero-tags"><span>Mask ${ipStr(c.mask)}</span><span>Class ${esc(classOf(c.ip))}</span><span>${esc(typeOf(c.ip))}</span></div></div><div class="hero-hosts"><span>Usable hosts</span><strong>${fmt(c.usable)}</strong><small>${fmt(c.size)} total addresses</small></div>`;
   $('#calc-kv').innerHTML = calcKV().map(([k,v])=>`<div><dt>${k}</dt><dd class="copyable" title="Click to copy">${esc(v)}</dd></div>`).join('');
-  renderCheck();
-}
-function renderCheck(){
-  const v=$('#calc-check').value.trim(), out=$('#calc-check-out');
-  if(!v){ out.innerHTML=''; return; }
-  const n=parseIP(v); if(n===null){ out.innerHTML='<span class="chip bad">Not a valid address</span>'; return; }
-  const c=calc(state.ip,state.p);
-  if(n<c.net||n>c.bc) out.innerHTML=`<span class="chip bad">Outside ${ipStr(c.net)}/${c.p}</span>`;
-  else if(c.p<31 && n===c.net) out.innerHTML='<span class="chip">Inside · this is the network address</span>';
-  else if(c.p<31 && n===c.bc) out.innerHTML='<span class="chip">Inside · this is the broadcast address</span>';
-  else out.innerHTML=`<span class="chip ok">Inside · usable host #${fmt(n-c.first+1)}</span>`;
 }
 $('#calc-in').addEventListener('input',e=>{
   const r=parseCIDR(e.target.value);
@@ -921,7 +916,6 @@ $('#calc-in').addEventListener('input',e=>{
 $('#calc-in').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const r=parseCIDR(e.target.value); if(!r.error) e.target.value=ipStr(r.ip)+'/'+r.p; }});
 $('#calc-prefix').addEventListener('input',e=>setCalc(state.ip,+e.target.value));
 $('#calc-bits').addEventListener('click',e=>{ const b=e.target.closest('.bit'); if(!b) return; const i=+b.dataset.i; setCalc(state.ip, i+1===state.p ? i : i+1); });
-$('#calc-check').addEventListener('input',renderCheck);
 $('#calc-kv').addEventListener('click',e=>{ const d=e.target.closest('dd'); if(d) copyText(d.textContent,d); });
 $('#calc-save').onclick=()=>{ const c=calc(state.ip,state.p); const t=ipStr(state.ip)+'/'+state.p; openSave('calc', `${ipStr(c.net)}/${c.p} subnet`, {input:t}); };
 $('#calc-export').onclick=()=>{ const c=calc(state.ip,state.p); openExport({title:`Subnet ${ipStr(c.net)}/${c.p}`, kv:calcKV()}); };
@@ -929,7 +923,7 @@ $('#calc-export').onclick=()=>{ const c=calc(state.ip,state.p); openExport({titl
 /* ================= NUMBER CONVERSION ================= */
 const SUP = k => `<sup>${k}</sup>`;
 const HEXD = n => n.toString(16).toUpperCase();
-let cvVal = 200, cvMethod = 'sub';
+let cvVal = 200, cvMethod = 'sub', cvSrc = 'dec', cvTab = 'd2b';
 function parseBase(raw, base){
   let s=String(raw).trim().toLowerCase().replace(/[\s,_]/g,'');
   if(base===2){ s=s.replace(/^0b/,'').replace(/\./g,''); if(!/^[01]+$/.test(s)) return {error:'Binary uses only the digits 0 and 1.'}; if(s.length>32) return {error:'Keep binary to 32 bits or fewer.'}; return {n:parseInt(s,2)}; }
@@ -939,85 +933,102 @@ function parseBase(raw, base){
 }
 const widthOf = n => n<=255 ? 8 : n<=65535 ? 16 : 32;
 const bitsOf = (n,w) => n.toString(2).padStart(w,'0');
+const nibbles = b => b.match(/.{4}/g).join(' ');
+const CV_TAB_FOR = {dec:'d2b', bin:'b2d', hex:'h2d'};
 function renderConvert(from){
   const bases={dec:10,bin:2,hex:16};
   if(from){
-    const el=$('#cv-'+from);
-    if(el.value.trim()===''){ el.classList.remove('invalid'); $('#cv-err').hidden=true; return; }
+    const el=$('#cv-'+from), box=el.closest('.cv-box');
+    if(el.value.trim()===''){ box.classList.remove('invalid'); $('#cv-err').hidden=true; return; }
     const r=parseBase(el.value,bases[from]);
-    el.classList.toggle('invalid',!!r.error); $('#cv-err').hidden=!r.error; $('#cv-err').textContent=r.error||'';
+    box.classList.toggle('invalid',!!r.error); $('#cv-err').hidden=!r.error; $('#cv-err').textContent=r.error||'';
     if(r.error) return;
-    cvVal=r.n;
-  } else { $$('.cv-inputs input').forEach(i=>i.classList.remove('invalid')); $('#cv-err').hidden=true; }
+    cvVal=r.n; cvSrc=from; cvTab=CV_TAB_FOR[from];
+  } else { $$('#v-convert .cv-inputs .cv-box').forEach(b=>b.classList.remove('invalid')); $('#cv-err').hidden=true; }
   const n=cvVal, w=widthOf(n), b=bitsOf(n,w);
   if(from!=='dec') $('#cv-dec').value=String(n);
-  if(from!=='bin') $('#cv-bin').value=b.match(/.{8}/g).join(' ');
+  if(from!=='bin') $('#cv-bin').value=nibbles(b);
   if(from!=='hex') $('#cv-hex').value=HEXD(n).padStart(w/4,'0');
+  $$('#v-convert .cv-field').forEach(f=>f.classList.toggle('src', f.dataset.base===cvSrc));
 
-  // place values
   let ph='';
   for(let o=0;o<w/8;o++){
     ph+='<div class="place">';
     for(let j=0;j<8;j++){ const i=o*8+j, k=w-1-i, v=2**k, on=b[i]==='1';
-      ph+=`<button type="button" data-k="${k}" aria-pressed="${on}" title="2^${k} = ${fmt(v)}"><small>${w===8?v:'2'+SUP(k)}</small><b>${on?1:0}</b></button>`; }
+      ph+=`<button type="button" data-k="${k}" aria-pressed="${on}" aria-label="Bit worth ${fmt(v)}, ${on?'on':'off'}" title="2^${k} = ${fmt(v)}"><small>${w===8?v:'2'+SUP(k)}</small><b>${on?1:0}</b></button>`; }
     ph+='</div>';
   }
   $('#oct-place').innerHTML=ph;
-
-  // decimal -> binary
-  let d2b='';
-  if(cvMethod==='sub'){
-    let rem=n, rows='';
-    for(let i=0;i<w;i++){ const k=w-1-i, v=2**k, fits=rem>=v;
-      rows+=`<tr><td class="mono r">${fmt(v)}</td><td class="mono r">${fmt(rem)}</td><td class="small">${fits?`${fmt(rem)} ≥ ${fmt(v)}, so subtract: ${fmt(rem)} − ${fmt(v)} = ${fmt(rem-v)}`:`${fmt(rem)} < ${fmt(v)}, so skip`}</td><td class="mono r ${fits?'on':''}">${fits?1:0}</td></tr>`;
-      if(fits) rem-=v; }
-    d2b=`<p class="note" style="margin-bottom:10px">Start at the largest place value. If what's left is at least that big, write 1 and subtract it. Otherwise write 0.</p><div class="tbl-wrap tbl-scroll" style="max-height:340px"><table><thead><tr><th class="r">Place</th><th class="r">Left</th><th>Step</th><th class="r">Bit</th></tr></thead><tbody>${rows}</tbody></table></div><p class="sum">Read the bits top to bottom: <b>${b}</b></p>`;
-  } else {
-    let x=n, rows=''; const list=[];
-    if(x===0) list.push([0,0,0]);
-    while(x>0){ list.push([x,Math.floor(x/2),x%2]); x=Math.floor(x/2); }
-    rows=list.map(([a,q,r])=>`<tr><td class="mono r">${fmt(a)} ÷ 2</td><td class="mono r">${fmt(q)}</td><td class="mono r on">${r}</td></tr>`).join('');
-    const raw=n.toString(2);
-    d2b=`<p class="note" style="margin-bottom:10px">Keep dividing by 2 and write down each remainder until the number reaches 0.</p><div class="tbl-wrap tbl-scroll" style="max-height:340px"><table><thead><tr><th class="r">Divide</th><th class="r">Result</th><th class="r">Remainder</th></tr></thead><tbody>${rows}</tbody></table></div><p class="sum">Read the remainders from bottom to top: <b>${raw}</b>${raw.length<w?`<br>Padded to ${w} bits: <b>${b}</b>`:''}</p>`;
-  }
-  $('#cv-d2b').innerHTML=d2b;
-
-  // binary -> decimal
-  let head='', bitsRow='';
-  for(let i=0;i<w;i++){ const k=w-1-i; head+=`<th class="r">${w===8?2**k:'2'+SUP(k)}</th>`; bitsRow+=`<td class="mono r ${b[i]==='1'?'on':''}">${b[i]}</td>`; }
+  $('#cv-width').textContent=`${w} bits`;
   const ones=[]; for(let i=0;i<w;i++) if(b[i]==='1') ones.push(2**(w-1-i));
-  $('#cv-b2d').innerHTML=`<div class="tbl-wrap"><table><thead><tr>${head}</tr></thead><tbody><tr>${bitsRow}</tr></tbody></table></div><p class="sum">${ones.length?`${ones.map(fmt).join(' + ')} = <b>${fmt(n)}</b>`:'No bits are on, so the value is <b>0</b>.'}</p>`;
-
-  // binary <-> hex
-  const groups=b.match(/.{4}/g);
-  $('#cv-b2h').innerHTML=`<div class="groups">${groups.map(g=>{ const v=parseInt(g,2); return `<div class="grp"><span>${g}</span><span class="muted">${[8,4,2,1].filter((p,i)=>g[i]==='1').join('+')||'0'} = ${v}</span><b>${HEXD(v)}</b></div>`; }).join('')}</div><p class="sum">Put the digits together: <b>${groups.map(g=>HEXD(parseInt(g,2))).join('')}</b> (written 0x${HEXD(n).padStart(w/4,'0')})</p>`;
-
-  // decimal <-> hex
-  let x=n; const hl=[]; if(x===0) hl.push([0,0,0]);
-  while(x>0){ hl.push([x,Math.floor(x/16),x%16]); x=Math.floor(x/16); }
-  const hx=HEXD(n), digits=hx.split('');
-  const terms=digits.map((d,i)=>`${d}${/[A-F]/.test(d)?` (${parseInt(d,16)})`:''} × 16${SUP(digits.length-1-i)}`);
-  const vals=digits.map((d,i)=>parseInt(d,16)*16**(digits.length-1-i));
-  $('#cv-d2h').innerHTML=`<p class="note" style="margin-bottom:10px"><b>Decimal → hex:</b> keep dividing by 16. Each remainder is a hex digit (10 = A … 15 = F).</p>
-    <div class="tbl-wrap"><table><thead><tr><th class="r">Divide</th><th class="r">Result</th><th class="r">Remainder</th><th class="r">Hex digit</th></tr></thead><tbody>${hl.map(([a,q,r])=>`<tr><td class="mono r">${fmt(a)} ÷ 16</td><td class="mono r">${fmt(q)}</td><td class="mono r">${r}</td><td class="mono r on">${HEXD(r)}</td></tr>`).join('')}</tbody></table></div>
-    <p class="sum">Read the digits from bottom to top: <b>${hx}</b></p>
-    <p class="note" style="margin-top:14px"><b>Hex → decimal:</b> multiply each digit by its power of 16 and add.</p>
-    <p class="sum">${terms.join(' + ')}<br>= ${vals.map(fmt).join(' + ')} = <b>${fmt(n)}</b></p>`;
+  $('#cv-sum').innerHTML = ones.length ? `${ones.map(fmt).join(' + ')} = <b>${fmt(n)}</b>` : 'All bits off = <b>0</b>';
+  renderWork();
 }
-$('#cv-dec').addEventListener('input',()=>renderConvert('dec'));
-$('#cv-bin').addEventListener('input',()=>renderConvert('bin'));
-$('#cv-hex').addEventListener('input',()=>renderConvert('hex'));
+function answer(label, value){ return `<div class="cv-answer"><span class="label">${label}</span><b>${value}</b></div>`; }
+function renderWork(){
+  $$('#cv-tabs button').forEach(t=>t.setAttribute('aria-selected', String(t.dataset.w===cvTab)));
+  const n=cvVal, w=widthOf(n), b=bitsOf(n,w), hx=HEXD(n);
+  let html='';
+  if(cvTab==='d2b'){
+    html+=`<div class="seg" style="margin-bottom:14px"><button type="button" data-m="sub" aria-pressed="${cvMethod==='sub'}">Subtract place values</button><button type="button" data-m="div" aria-pressed="${cvMethod==='div'}">Divide by 2</button></div>`;
+    if(cvMethod==='sub'){
+      let rem=n, rows='';
+      for(let i=0;i<w;i++){ const k=w-1-i, v=2**k, fits=rem>=v;
+        rows+=`<tr class="${fits?'hit':'skip'}"><td class="mono r">${fmt(v)}</td><td class="mono r">${fmt(rem)}</td><td class="small">${fits?`${fmt(rem)} − ${fmt(v)} = ${fmt(rem-v)}`:`${fmt(rem)} is less than ${fmt(v)}`}</td><td class="mono r"><b>${fits?1:0}</b></td></tr>`;
+        if(fits) rem-=v; }
+      html+=`<div class="work-grid"><div class="tbl-wrap tbl-scroll" style="max-height:380px"><table><thead><tr><th class="r">Place</th><th class="r">Left</th><th>Step</th><th class="r">Bit</th></tr></thead><tbody>${rows}</tbody></table></div>
+        <ol class="work-steps"><li>List the place values from ${fmt(2**(w-1))} down to 1.</li><li>If what's left is at least the place value, write <b>1</b> and subtract it.</li><li>Otherwise write <b>0</b> and move on.</li><li>Read the bits from top to bottom.</li></ol></div>${answer('Binary',nibbles(b))}`;
+    } else {
+      let x=n; const list=[]; if(x===0) list.push([0,0,0]);
+      while(x>0){ list.push([x,Math.floor(x/2),x%2]); x=Math.floor(x/2); }
+      const raw=n.toString(2);
+      html+=`<div class="work-grid"><div class="tbl-wrap tbl-scroll" style="max-height:380px"><table><thead><tr><th class="r">Divide</th><th class="r">Result</th><th class="r">Remainder</th></tr></thead><tbody>${list.map(([a,q,r])=>`<tr><td class="mono r">${fmt(a)} ÷ 2</td><td class="mono r">${fmt(q)}</td><td class="mono r"><b>${r}</b></td></tr>`).join('')}</tbody></table></div>
+        <ol class="work-steps"><li>Divide by 2 and write down the remainder (0 or 1).</li><li>Keep dividing the result until it reaches 0.</li><li>Read the remainders from <b>bottom to top</b>: ${raw}.</li>${raw.length<w?`<li>Pad with zeros on the left to ${w} bits.</li>`:''}</ol></div>${answer('Binary',nibbles(b))}`;
+    }
+  } else if(cvTab==='b2d'){
+    let head='', row='';
+    for(let i=0;i<w;i++){ const k=w-1-i; head+=`<th class="r">${w===8?2**k:'2'+SUP(k)}</th>`; row+=`<td class="mono r ${b[i]==='1'?'on':''}">${b[i]}</td>`; }
+    const ones=[]; for(let i=0;i<w;i++) if(b[i]==='1') ones.push(2**(w-1-i));
+    html+=`<ol class="work-steps" style="margin-bottom:12px"><li>Write the place value over each bit, doubling from 1 on the right.</li><li>Add up the place values that sit over a <b>1</b>.</li></ol>
+      <div class="tbl-wrap"><table><thead><tr>${head}</tr></thead><tbody><tr>${row}</tr></tbody></table></div>
+      <p class="sum">${ones.length?ones.map(fmt).join(' + '):'No bits are on'}</p>${answer('Decimal',fmt(n))}`;
+  } else if(cvTab==='b2h'){
+    const groups=b.match(/.{4}/g);
+    html+=`<ol class="work-steps" style="margin-bottom:12px"><li>Split the bits into groups of four from the right. Each group is a nibble.</li><li>Inside a nibble the place values are 8, 4, 2, 1. Add them up.</li><li>Swap each total for its hex digit (10 = A … 15 = F). Going back to binary is the same in reverse.</li></ol>
+      <div class="groups">${groups.map(g=>{ const v=parseInt(g,2); return `<div class="grp"><span>${g}</span><span class="muted">${[8,4,2,1].filter((p,i)=>g[i]==='1').join('+')||'0'} = ${v}</span><b>${HEXD(v)}</b></div>`; }).join('')}</div>
+      ${answer('Hexadecimal','0x'+groups.map(g=>HEXD(parseInt(g,2))).join(''))}`;
+  } else if(cvTab==='d2h'){
+    let x=n; const hl=[]; if(x===0) hl.push([0,0,0]);
+    while(x>0){ hl.push([x,Math.floor(x/16),x%16]); x=Math.floor(x/16); }
+    html+=`<div class="work-grid"><div class="tbl-wrap"><table><thead><tr><th class="r">Divide</th><th class="r">Result</th><th class="r">Remainder</th><th class="r">Hex digit</th></tr></thead><tbody>${hl.map(([a,q,r])=>`<tr><td class="mono r">${fmt(a)} ÷ 16</td><td class="mono r">${fmt(q)}</td><td class="mono r">${r}</td><td class="mono r on">${HEXD(r)}</td></tr>`).join('')}</tbody></table></div>
+      <ol class="work-steps"><li>Divide by 16 and write down the remainder.</li><li>Turn each remainder into a hex digit (10 = A, 11 = B … 15 = F).</li><li>Keep going until the result is 0, then read the digits from <b>bottom to top</b>.</li></ol></div>${answer('Hexadecimal','0x'+hx)}`;
+  } else {
+    const digits=hx.split(''), L=digits.length;
+    const rows=digits.map((d,i)=>{ const p=L-1-i, v=parseInt(d,16); return `<tr><td class="mono r on">${d}</td><td class="mono r">${v}</td><td class="mono r">16${SUP(p)} = ${fmt(16**p)}</td><td class="mono r">${fmt(v*16**p)}</td></tr>`; }).join('');
+    html+=`<div class="work-grid"><div class="tbl-wrap"><table><thead><tr><th class="r">Digit</th><th class="r">Value</th><th class="r">Place</th><th class="r">Digit × place</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <ol class="work-steps"><li>Turn each hex digit into its value (A = 10 … F = 15).</li><li>Multiply by its place: 1, 16, 256, 4,096 … from the right.</li><li>Add the results.</li></ol></div>
+      <p class="sum">${digits.map((d,i)=>fmt(parseInt(d,16)*16**(L-1-i))).join(' + ')}</p>${answer('Decimal',fmt(n))}`;
+  }
+  $('#cv-work').innerHTML=html;
+}
+['dec','bin','hex'].forEach(k=>$('#cv-'+k).addEventListener('input',()=>renderConvert(k)));
 $('#oct-place').addEventListener('click',e=>{ const b=e.target.closest('button[data-k]'); if(!b) return; cvVal=(cvVal ^ 2**(+b.dataset.k))>>>0; renderConvert(); });
-$('#cv-method').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; cvMethod=b.dataset.m; $$('#cv-method button').forEach(x=>x.setAttribute('aria-pressed',x===b)); renderConvert(); });
-function cvLoad(n){ cvVal=n; renderConvert(); $('#v-convert').scrollIntoView({behavior:'smooth',block:'start'}); }
+$('#cv-tabs').addEventListener('click',e=>{ const b=e.target.closest('[data-w]'); if(!b) return; cvTab=b.dataset.w; renderWork(); });
+$('#cv-tabs').addEventListener('keydown',e=>{ if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft') return; const t=$$('#cv-tabs button'); const i=t.findIndex(x=>x.dataset.w===cvTab); const n=t[(i+(e.key==='ArrowRight'?1:t.length-1))%t.length]; cvTab=n.dataset.w; renderWork(); n.focus(); });
+$('#cv-work').addEventListener('click',e=>{ const b=e.target.closest('[data-m]'); if(!b) return; cvMethod=b.dataset.m; renderWork(); });
+$('#v-convert').addEventListener('click',e=>{ const c=e.target.closest('[data-copy]'); if(!c) return; const inp=$('#cv-'+c.dataset.copy); const v=inp.value.replace(/\s+/g,''); copyText(c.dataset.copy==='hex'?'0x'+v:c.dataset.copy==='bin'?v:v, inp); });
+const CV_EXAMPLES=[10,127,192,255,256,1000,1024,65535];
+$('#cv-examples').insertAdjacentHTML('beforeend', CV_EXAMPLES.map(v=>`<button type="button" data-ex="${v}">${fmt(v)}</button>`).join(''));
+$('#cv-examples').addEventListener('click',e=>{ const b=e.target.closest('[data-ex]'); if(!b) return; cvVal=+b.dataset.ex; cvSrc='dec'; cvTab='d2b'; renderConvert(); });
+function cvLoad(n){ cvVal=n; cvSrc='dec'; cvTab='d2b'; renderConvert(); $('.cv-main').scrollIntoView({behavior:'smooth',block:'start'}); }
 
 // IP address conversion
 function renderCvIP(){
-  const n=parseIP($('#cv-ip').value); $('#cv-ip').classList.toggle('invalid',n===null);
+  const n=parseIP($('#cv-ip').value); $('#cv-ip').closest('.cv-box').classList.toggle('invalid',n===null);
   if(n===null) return;
   const o=ipStr(n).split('.').map(Number);
   $('#cv-ip-table').innerHTML='<thead><tr><th>Octet</th><th class="r">Decimal</th><th>Binary</th><th>Hex</th><th></th></tr></thead><tbody>'+
-    o.map((v,i)=>`<tr><td>${i+1}</td><td class="mono r">${v}</td><td class="mono">${bitsOf(v,8)}</td><td class="mono">${HEXD(v).padStart(2,'0')}</td><td><button class="btn ghost sm" data-load="${v}">Working</button></td></tr>`).join('')+'</tbody>';
+    o.map((v,i)=>`<tr><td>${i+1}</td><td class="mono r">${v}</td><td class="mono">${bitsOf(v,8)}</td><td class="mono">${HEXD(v).padStart(2,'0')}</td><td><button class="btn ghost sm" data-load="${v}">Show working</button></td></tr>`).join('')+'</tbody>';
   $('#cv-ip-kv').innerHTML=[['Dotted decimal',ipStr(n)],['Dotted binary',binDots(n)],['Dotted hex',o.map(v=>HEXD(v).padStart(2,'0')).join('.')],['32-bit integer',String(n)],['Hex',hex(n)]]
     .map(([k,v])=>`<div><dt>${k}</dt><dd class="copyable" title="Click to copy">${v}</dd></div>`).join('');
 }
@@ -1100,53 +1111,6 @@ $('#mask-table').addEventListener('click',e=>{ const tr=e.target.closest('tr[dat
 $('#mask-in').addEventListener('input',renderMask);
 $('#mask-kv').addEventListener('click',e=>{ const d=e.target.closest('dd'); if(d) copyText(d.textContent,d); });
 $('#mask-export').onclick=()=>openExport({title:'IPv4 prefix reference', table:{head:['Prefix','Subnet mask','Wildcard','Addresses','Usable hosts'], rows:maskTableRows()}});
-
-/* ================= EQUAL ================= */
-let eqMode='subnets', eqResult=null;
-function computeEqual(){
-  const r=parseCIDR($('#eq-net').value); const val=Math.floor(+$('#eq-val').value);
-  if(r.error) return {error:r.error};
-  if(!(val>=1)) return {error:'Enter a whole number of 1 or more.'};
-  const base=calc(r.ip,r.p); let np;
-  if(eqMode==='subnets'){ np = r.p + Math.ceil(Math.log2(val)); if(np>32) return {error:`A /${r.p} can't be split into ${fmt(val)} subnets. The most is ${fmt(2**(32-r.p))} single addresses.`}; }
-  else { np = prefixForHosts(val); if(np===null) return {error:'That is more hosts than IPv4 can hold.'}; if(np<r.p) return {error:`${fmt(val)} hosts needs a /${np}, which is bigger than the /${r.p} you are dividing.`}; }
-  const count=2**(np-r.p), size=2**(32-np);
-  return {base, p:r.p, np, count, size, val, normalized: base.net!==r.ip, implied:r.implied};
-}
-function equalRows(res, limit=Infinity){
-  const rows=[]; const n=Math.min(res.count,limit);
-  for(let i=0;i<n;i++){ const c=calc(res.base.net + i*res.size, res.np); rows.push([String(i+1), ipStr(c.net)+'/'+c.p, ipStr(c.first), ipStr(c.last), ipStr(c.bc), fmt(c.usable)]); }
-  return rows;
-}
-function renderEqual(showAll){
-  const res=computeEqual(); eqResult=res;
-  $('#eq-err').hidden=!res.error; $('#eq-err').textContent=res.error||''; $('#eq-out-panel').hidden=!!res.error;
-  if(res.error){ $('#eq-note').textContent=''; return; }
-  const notes=[];
-  if(res.normalized) notes.push(`Host bits were set, so the network ${ipStr(res.base.net)}/${res.p} is used.`);
-  if(res.implied) notes.push(`No prefix given, so the classful default /${res.p} is used.`);
-  if(eqMode==='subnets' && res.count>res.val) notes.push(`${fmt(res.val)} subnets need ${res.np-res.p} borrowed bit${res.np-res.p===1?'':'s'}, which gives ${fmt(res.count)}. The extra ${fmt(res.count-res.val)} are spare.`);
-  if(res.np>30) notes.push(`/${res.np} subnets have no room for a separate network and broadcast address.`);
-  $('#eq-note').textContent=notes.join(' ');
-  $('#eq-hero').innerHTML=[['New prefix','/'+res.np+' · '+ipStr(maskOf(res.np))],['Borrowed bits',String(res.np-res.p)],['Subnets',fmt(res.count)],['Usable hosts each',fmt(usableOf(res.np))]].map(([k,v])=>`<div class="num"><span class="label">${k}</span><b>${v}</b></div>`).join('');
-  renderBits($('#eq-bits'), res.base.net, res.np, {base:res.p, static:true});
-  const LIMIT = showAll ? 4096 : 256;
-  const rows=equalRows(res, LIMIT);
-  $('#eq-table').innerHTML='<thead><tr><th class="r">#</th><th>Subnet</th><th>First host</th><th>Last host</th><th>Broadcast</th><th class="r">Usable</th></tr></thead><tbody>'+rows.map(r=>`<tr class="click" data-net="${r[1]}"><td class="mono r">${r[0]}</td><td class="mono">${r[1]}</td><td class="mono">${r[2]}</td><td class="mono">${r[3]}</td><td class="mono">${r[4]}</td><td class="mono r">${r[5]}</td></tr>`).join('')+'</tbody>';
-  $('#eq-more').innerHTML = res.count>rows.length ? `Showing ${fmt(rows.length)} of ${fmt(res.count)} subnets. ${!showAll && res.count>256?'<button class="btn sm" id="eq-showall">Show up to 4,096</button>':''}` : 'Click a subnet to open it in the calculator.';
-  const sa=$('#eq-showall'); if(sa) sa.onclick=()=>renderEqual(true);
-  logHistory('equal', `${ipStr(res.base.net)}/${res.p} ÷ ${eqMode==='subnets'?res.val+' subnets':res.val+' hosts'}`, eqData());
-}
-function eqData(){ return {net:$('#eq-net').value.trim(), mode:eqMode, value:+$('#eq-val').value}; }
-function setEqMode(m){ eqMode=m; $$('#eq-mode button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.mode===m)); $('#eq-val-label').textContent = m==='subnets'?'Subnets needed':'Hosts per subnet'; }
-$('#eq-mode').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; setEqMode(b.dataset.mode); $('#eq-val').value = eqMode==='subnets'?6:50; renderEqual(); });
-$('#eq-net').addEventListener('input',()=>renderEqual()); $('#eq-val').addEventListener('input',()=>renderEqual());
-$('#eq-table').addEventListener('click',e=>{ const tr=e.target.closest('tr[data-net]'); if(!tr) return; const r=parseCIDR(tr.dataset.net); setCalc(r.ip,r.p); go('calc'); });
-$('#eq-save').onclick=()=>{ const res=eqResult; if(!res||res.error) return toast('Fix the input first'); openSave('equal', `${ipStr(res.base.net)}/${res.p} into ${fmt(res.count)} × /${res.np}`, eqData()); };
-$('#eq-export').onclick=()=>{ const res=eqResult; if(!res||res.error) return toast('Fix the input first');
-  openExport({title:`${ipStr(res.base.net)}-${res.p} split into ${res.count} x ${res.np}`.replace(/-(\d+) split/,'/$1 split').replace(/ x (\d+)$/,' × /$1'),
-    sections:[{heading:'Summary',kv:[['Network',ipStr(res.base.net)+'/'+res.p],['New prefix','/'+res.np+' ('+ipStr(maskOf(res.np))+')'],['Borrowed bits',String(res.np-res.p)],['Subnets',fmt(res.count)],['Usable hosts each',fmt(usableOf(res.np))]]},
-      {heading:'Subnets',table:{head:['#','Subnet','First host','Last host','Broadcast','Usable'],rows:equalRows(res,65536)}}]}); };
 
 /* ================= VLSM ================= */
 let vRows = [
@@ -1409,14 +1373,14 @@ function summary(it){
 function loadItem(it){
   const d=it.data||{};
   if(it.kind==='calc'){ const r=parseCIDR(d.input); if(!r.error){ setCalc(r.ip,r.p); } go('calc'); }
-  else if(it.kind==='equal'){ $('#eq-net').value=d.net; setEqMode(d.mode==='hosts'?'hosts':'subnets'); $('#eq-val').value=d.value; renderEqual(); go('equal'); }
+  else if(it.kind==='equal'){ toast('Equal subnetting is turned off for now'); }
   else if(it.kind==='vlsm'){ $('#v-base').value=d.base; vRows=(d.rows||[]).map(r=>({name:String(r.name),hosts:+r.hosts})); renderVRows(); renderVLSM(); go('vlsm'); }
 }
 function renderSaved(){
   $('#saved-count').textContent=Saved.items.length;
   $('#saved-where').textContent = Saved.col ? 'Saved to your account, visible only to you.' : 'Saved in this browser.';
   $('#saved-list').innerHTML = Saved.items.length ? Saved.items.map(it=>`<div class="item" data-id="${esc(it.id)}"><div class="t"><span class="chip ${it.kind==='vlsm'?'sub':'net'}" style="margin-bottom:4px">${KIND_LABEL[it.kind]||it.kind}</span><b>${esc(it.name)}</b><span class="small muted">${esc(summary(it))} · ${timeAgo(it.at)}</span></div><div class="acts"><button class="btn sm" data-act="open">Open</button><button class="btn ghost sm" data-act="rename">Rename</button><button class="btn ghost sm danger" data-act="del">Delete</button></div></div>`).join('')
-    : '<div class="empty">Nothing saved yet. Use Save on the Calculator, Equal subnets or VLSM planner.</div>';
+    : '<div class="empty">Nothing saved yet. Use Save on the Calculator or VLSM planner.</div>';
 }
 function renderHistory(){
   $('#hist-list').innerHTML = history.length ? history.map(h=>`<div class="item" data-id="${h.id}"><div class="t"><b>${esc(h.label)}</b><span class="small muted">${KIND_LABEL[h.kind]} · ${timeAgo(h.at)}</span></div><div class="acts"><button class="btn sm" data-act="open">Open</button><button class="btn ghost sm" data-act="save">Save</button></div></div>`).join('')
@@ -1459,12 +1423,11 @@ const PAGE_META = {
   calc:['Calculate','Subnet calculator','Type an address with a prefix or mask, like 192.168.10.77/26.'],
   convert:['Calculate','Number conversion','Convert between decimal, binary and hexadecimal, with the working shown.'],
   masks:['Calculate','Mask converter','Turn a prefix, mask, wildcard or host count into every other form.'],
-  equal:['Plan','Equal subnetting','Split a network into equal-sized subnets.'],
   vlsm:['Plan','VLSM planner','Fit subnets of different sizes into one address block.'],
   practice:['Learn','Practice','Drill subnetting with a worksheet or quick questions.'],
   saved:['Library','Saved & history','Reopen saved calculations and recent work.']
 };
-const PAGE_ACTIONS = {calc:['calc-export','calc-save'], equal:['eq-export','eq-save'], vlsm:['v-export','v-save']};
+const PAGE_ACTIONS = {calc:['calc-export','calc-save'], vlsm:['v-export','v-save']};
 const actGroups = {};
 Object.entries(PAGE_ACTIONS).forEach(([v,ids])=>{
   const g=document.createElement('div'); g.className='tb-group'; g.hidden=true;
@@ -1482,7 +1445,7 @@ function setNav(open){
 }
 $('#menu-btn').onclick=()=>setNav(true);
 $('#scrim').onclick=()=>setNav(false);
-const FOCUS = {calc:'#calc-in', convert:'#cv-dec', masks:'#mask-in', equal:'#eq-net', vlsm:'#v-base'};
+const FOCUS = {calc:'#calc-in', convert:'#cv-dec', masks:'#mask-in', vlsm:'#v-base'};
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape' && $('.app').classList.contains('nav-open')){ setNav(false); $('#menu-btn').focus(); return; }
   if(e.key==='/' && !e.metaKey && !e.ctrlKey && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) && $('#modal').hidden){
@@ -1504,7 +1467,7 @@ document.addEventListener('keydown',e=>{
 })();
 
 /* ================= routing ================= */
-const VIEWS=['calc','convert','masks','equal','vlsm','practice','saved'];
+const VIEWS=['calc','convert','masks','vlsm','practice','saved'];
 let currentView='calc';
 function go(v){ if(location.hash!=='#'+v) location.hash=v; else show(v); }
 function show(v){
@@ -1527,7 +1490,7 @@ window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
 (function boot(){
   const r=parseCIDR($('#calc-in').value); state.ip=r.ip; state.p=r.p;
   renderCalc(); renderConvert(); renderCvIP(); cvNewQ(); cvScore(); renderMask();
-  renderEqual(); renderVRows(); renderVLSM();
+  renderVRows(); renderVLSM();
   renderPracticeSettings(); renderScore(); newQ(); wsNew();
   renderHistory(); renderRecent(); renderSaved();
   show(location.hash.slice(1) || 'calc');

@@ -20,6 +20,7 @@
   --shadow:0 1px 2px rgba(19,26,43,.06),0 4px 16px rgba(19,26,43,.05);
   --side:#0E1A2E; --side-ink:#A3B1C8; --side-strong:#FFFFFF; --side-dim:#71819B; --side-active:#1C2C48;
   --hero:#13213A; --hero-ink:#F3F6FB; --hero-muted:#A9B7CF; --hero-accent:#8FB0FF; --bg-glass:rgba(241,243,247,.88);
+  --c1:#2350D0; --c2:#0B8577; --c3:#B96F00; --c4:#7C3AED; --c5:#C2410C; --c6:#0E7490; --c7:#4D7C0F; --c8:#BE185D;
   --f-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
   --f-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
@@ -32,6 +33,7 @@
   --ok:#4CC98A; --ok-soft:#123323; --bad:#F2777C; --bad-soft:#3B1719;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25); color-scheme:dark;
   --side:#080D18; --side-active:#18243B; --hero:#1A2844; --bg-glass:rgba(13,18,32,.88);
+  --c1:#7096FF; --c2:#38C4AE; --c3:#F0B142; --c4:#B794F6; --c5:#FB8A5A; --c6:#45B8D6; --c7:#9BCF4E; --c8:#F27BB0;
 }}
 :root[data-theme="dark"]{
   --bg:#0D1220; --surface:#151C2D; --sunken:#1B2337; --ink:#E5E9F2; --muted:#97A2BA; --line:#273149;
@@ -41,6 +43,7 @@
   --ok:#4CC98A; --ok-soft:#123323; --bad:#F2777C; --bad-soft:#3B1719;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25); color-scheme:dark;
   --side:#080D18; --side-active:#18243B; --hero:#1A2844; --bg-glass:rgba(13,18,32,.88);
+  --c1:#7096FF; --c2:#38C4AE; --c3:#F0B142; --c4:#B794F6; --c5:#FB8A5A; --c6:#45B8D6; --c7:#9BCF4E; --c8:#F27BB0;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -283,6 +286,40 @@ td.on{background:var(--net-soft);font-weight:600}
 .map-key{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;margin-top:8px}
 .map-key span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--c)}
 
+/* vlsm planner */
+.vl-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:18px;align-items:start}
+@media (max-width:1050px){.vl-grid{grid-template-columns:minmax(0,1fr)}}
+.vhead,.vrow{display:grid;grid-template-columns:8px minmax(0,1fr) 88px 112px 34px;gap:8px;align-items:center}
+.vhead{padding-bottom:6px;border-bottom:1px solid var(--line)}
+.vhead span{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.vrow{padding:7px 0;border-bottom:1px dashed var(--line)}
+.vrow .swatch{width:8px;height:30px;border-radius:3px;background:var(--c)}
+.vrow input{padding:8px 10px}
+.vrow .need{font-family:var(--f-mono);font-size:.82rem;color:var(--muted);text-align:right;white-space:nowrap}
+.vrow.fail .need{color:var(--bad);font-weight:600}
+.x{border:0;background:none;width:34px;height:34px;border-radius:6px;color:var(--muted);cursor:pointer;font-size:1.25rem;line-height:1}
+.x:hover{background:var(--bad-soft);color:var(--bad)}
+@media (max-width:620px){
+  .vhead{display:none}
+  .vrow{grid-template-columns:8px minmax(0,1fr) 84px 34px;row-gap:4px}
+  .vrow .swatch{grid-row:1 / 3;height:100%}
+  .vrow .need{grid-column:2 / 4;grid-row:2;text-align:left}
+  .vrow .x{grid-column:4;grid-row:1}
+}
+.vl-status{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.vl-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:16px}
+#v-map{height:46px;border-radius:8px;margin-top:6px}
+#v-map span{background:var(--c);display:flex;align-items:center;justify-content:center;overflow:hidden;border-right:2px solid var(--surface)}
+#v-map span:last-child{border-right:0}
+#v-map span em{font-style:normal;font-size:.72rem;font-weight:600;color:var(--surface);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+#v-map span.free{background:repeating-linear-gradient(45deg,var(--sunken) 0 6px,var(--surface) 6px 12px)}
+#v-map span.free em{color:var(--muted)}
+.map-ticks{display:flex;justify-content:space-between;gap:10px;font-family:var(--f-mono);font-size:.75rem;color:var(--muted);margin-top:6px}
+.sw{display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--c);margin-right:8px;vertical-align:0}
+.usage{display:inline-block;width:64px;height:6px;border-radius:3px;background:var(--sunken);vertical-align:middle;margin-right:8px;overflow:hidden}
+.usage i{display:block;height:100%;background:var(--c)}
+tr.fail td{color:var(--bad)}
+
 /* practice */
 .score{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 @media (max-width:620px){.score{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -476,16 +513,10 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
 
     <div class="mk-tiles" id="mask-tiles"></div>
 
-    <div class="cols-even">
-      <div class="panel">
+    <div class="panel">
         <div class="panel-head"><h3>Mask in binary</h3><div class="legend"><span style="--c:var(--net)">Network</span><span style="--c:var(--host)">Host</span></div></div>
         <div class="bits static" id="mask-bits"></div>
         <p class="note" id="mask-block" style="margin-top:14px"></p>
-      </div>
-      <div class="panel">
-        <div class="panel-head"><h3>More formats</h3><span class="small muted">Click a value to copy it</span></div>
-        <dl class="kv" id="mask-kv" style="grid-template-columns:minmax(0,1fr)"></dl>
-      </div>
     </div>
 
     <div class="panel">
@@ -496,25 +527,34 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
 
   <!-- VLSM -->
   <section class="view" id="v-vlsm" data-view="vlsm" hidden>
-    <div class="cols-even">
+    <div class="panel">
+      <label class="label" for="v-base" style="display:block;margin-bottom:7px">Address block to divide</label>
+      <div class="cv-box"><input type="text" id="v-base" value="10.20.0.0/22" spellcheck="false" autocomplete="off"><span class="chip" id="v-base-info" style="margin-right:10px;white-space:nowrap"></span></div>
+      <p class="err" id="v-err" hidden style="margin-top:10px"></p>
+      <div class="chips cv-examples" id="v-presets"><span class="label">Load an example</span></div>
+      <div hidden><button class="btn primary" id="v-save">Save</button><button class="btn" id="v-export">Export</button></div>
+    </div>
+
+    <div class="vl-grid">
       <div class="panel">
-        <div class="panel-head"><h3>Subnets to place</h3><div class="row"><button class="btn primary" id="v-save">Save</button><button class="btn" id="v-export">Export</button></div></div>
-        <div class="field" style="margin-bottom:14px"><label class="label" for="v-base">Address block</label><input type="text" class="mono" id="v-base" value="10.20.0.0/22" spellcheck="false"></div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span class="label">Subnet name</span><span class="label" style="margin-right:84px">Hosts</span></div>
-        <div class="vrows" id="v-rows"></div>
-        <div class="row" style="margin-top:10px"><button class="btn sm" id="v-add">Add subnet</button><button class="btn ghost sm" id="v-clear">Clear all</button></div>
+        <div class="panel-head"><div><h3>Subnets</h3><p class="muted small">Enter the hosts each subnet needs. Press Enter in the last row to add another.</p></div></div>
+        <div class="vhead" aria-hidden="true"><span></span><span>Name</span><span>Hosts</span><span style="text-align:right">Gets</span><span></span></div>
+        <div id="v-rows"></div>
+        <div class="row" style="margin-top:12px;justify-content:space-between"><button class="btn sm" id="v-add">+ Add subnet</button><button class="btn ghost sm danger" id="v-clear">Clear all</button></div>
       </div>
       <div class="panel">
-        <h3 style="margin-bottom:10px">Allocation</h3>
-        <div class="hero-nums" id="v-hero" style="grid-template-columns:repeat(2,minmax(0,1fr))"></div>
-        <div class="map" id="v-map" aria-label="Address space map"></div>
-        <div class="map-key" id="v-key"></div>
-        <p class="err" id="v-err" hidden style="margin-top:10px"></p>
-        <div id="v-free" style="margin-top:12px"></div>
+        <div class="panel-head"><h3>Allocation</h3></div>
+        <div class="vl-status" id="v-status"></div>
+        <div class="vl-stats" id="v-hero"></div>
+        <span class="label">Address space</span>
+        <div class="map" id="v-map" role="img" aria-label="Address space map"></div>
+        <div class="map-ticks" id="v-ticks"></div>
+        <div id="v-free" style="margin-top:14px"></div>
       </div>
     </div>
+
     <div class="panel">
-      <p class="note" style="margin-bottom:10px">Subnets are placed largest first so every block lands on its natural boundary. Each one is sized to the smallest prefix whose usable hosts cover the request.</p>
+      <div class="panel-head"><div><h3>Subnet plan</h3><p class="muted small">Placed largest first so every block starts on its own boundary. Click a row to open it in the calculator.</p></div></div>
       <div class="tbl-wrap"><table id="v-table"></table></div>
     </div>
   </section>
@@ -1152,8 +1192,6 @@ function renderMask(){
     .map(([k,v],i)=>`<button type="button" class="tile${i===0?' lead':''}" data-copy="${v}"><span class="label">${k}</span><b>${v}</b><small>Click to copy</small></button>`).join('');
   renderBits($('#mask-bits'), m, p, {static:true});
   $('#mask-block').textContent=maskBlockNote(p);
-  $('#mask-kv').innerHTML = maskKV(p).filter(([k])=>!['CIDR prefix','Subnet mask','Wildcard mask','Usable hosts'].includes(k))
-    .map(([k,v])=>`<div><dt>${k}</dt><dd class="copyable" title="Click to copy">${esc(v)}</dd></div>`).join('');
   $$('#mask-table tbody tr').forEach(tr=>tr.classList.toggle('sel', +tr.dataset.p===p));
   const sel=$(`#mask-table tr[data-p="${p}"]`), wrap=$('#mask-table-wrap');
   if(sel && wrap) wrap.scrollTop = Math.max(0, sel.offsetTop - wrap.clientHeight/2 + sel.offsetHeight/2);
@@ -1168,18 +1206,22 @@ const MASK_EXAMPLES=['/8','/16','/24','/26','/30','255.255.240.0','0.0.0.63','50
 $('#mask-examples').insertAdjacentHTML('beforeend', MASK_EXAMPLES.map(v=>`<button type="button" data-mex="${v}">${v}</button>`).join(''));
 $('#mask-examples').addEventListener('click',e=>{ const b=e.target.closest('[data-mex]'); if(!b) return; $('#mask-in').value=b.dataset.mex; renderMask(); });
 $('#mask-in').addEventListener('input',renderMask);
-$('#mask-kv').addEventListener('click',e=>{ const d=e.target.closest('dd'); if(d) copyText(d.textContent,d); });
 $('#mask-export').onclick=()=>openExport({title:'IPv4 prefix reference', table:{head:['Prefix','Subnet mask','Wildcard','Addresses','Usable hosts'], rows:maskTableRows()}});
 
 /* ================= VLSM ================= */
-let vRows = [
-  {name:'Engineering',hosts:250},{name:'Sales',hosts:120},{name:'Guest Wi-Fi',hosts:60},
-  {name:'Servers',hosts:28},{name:'Printers',hosts:12},{name:'WAN link A',hosts:2},{name:'WAN link B',hosts:2}
-];
+const V_PRESETS = {
+  'Company': {base:'10.20.0.0/22', rows:[['Engineering',250],['Sales',120],['Guest Wi-Fi',60],['Servers',28],['Printers',12],['WAN link A',2],['WAN link B',2]]},
+  'Small office': {base:'192.168.1.0/24', rows:[['Staff',60],['Guest Wi-Fi',30],['Cameras',12],['Printers',10],['Management',6]]},
+  'Campus': {base:'172.16.0.0/20', rows:[['Students',1000],['Guest Wi-Fi',500],['Faculty',400],['Library',200],['Admin',100],['Servers',50]]},
+  'WAN links': {base:'10.255.0.0/26', rows:[['Link 1',2],['Link 2',2],['Link 3',2],['Link 4',2],['Link 5',2],['Link 6',2]]},
+};
+let vRows = V_PRESETS['Company'].rows.map(([name,hosts])=>({name,hosts}));
 let vResult=null;
-const VCOLORS=['--net','--sub','--host','--ok','--bad'];
+const VPAL=['--c1','--c2','--c3','--c4','--c5','--c6','--c7','--c8'];
+const vColor = i => `var(${VPAL[i%VPAL.length]})`;
 function renderVRows(){
-  $('#v-rows').innerHTML = vRows.map((r,i)=>`<div class="vrow"><input type="text" data-i="${i}" data-k="name" id="v-name-${i}" value="${esc(r.name)}" aria-label="Subnet name"><input type="number" class="mono" min="1" data-i="${i}" data-k="hosts" id="v-hosts-${i}" value="${r.hosts}" aria-label="Hosts needed"><button class="btn ghost sm" data-del="${i}" aria-label="Remove ${esc(r.name)}">Remove</button></div>`).join('') || '<div class="empty">No subnets yet. Add one to start planning.</div>';
+  $('#v-rows').innerHTML = vRows.length ? vRows.map((r,i)=>`<div class="vrow" data-i="${i}" style="--c:${vColor(i)}"><span class="swatch" aria-hidden="true"></span><input type="text" data-i="${i}" data-k="name" id="v-name-${i}" value="${esc(r.name)}" aria-label="Subnet ${i+1} name"><input type="number" class="mono" min="1" data-i="${i}" data-k="hosts" id="v-hosts-${i}" value="${r.hosts}" aria-label="Hosts needed for ${esc(r.name)}"><span class="need" id="v-need-${i}"></span><button type="button" class="x" data-del="${i}" aria-label="Remove ${esc(r.name)}">×</button></div>`).join('')
+    : '<div class="empty" style="margin-top:10px">No subnets yet. Add one, or load an example above.</div>';
 }
 function computeVLSM(){
   const r=parseCIDR($('#v-base').value); if(r.error) return {error:r.error};
@@ -1203,29 +1245,61 @@ function vlsmTable(res){
 }
 function renderVLSM(){
   const res=computeVLSM(); vResult=res;
-  $('#v-base').classList.toggle('invalid',!!res.error);
-  if(res.error){ $('#v-err').hidden=false; $('#v-err').textContent=res.error; return; }
-  const total=res.base.size, pct=(res.used/total*100);
-  $('#v-hero').innerHTML=[['Block',ipStr(res.base.net)+'/'+res.p],['Space used',`${fmt(res.used)} of ${fmt(total)} (${pct.toFixed(pct<10?1:0)}%)`]].map(([k,v])=>`<div class="num"><span class="label">${k}</span><b>${v}</b></div>`).join('');
-  const placed=res.alloc.filter(a=>!a.fail);
-  $('#v-map').innerHTML = placed.map((a,i)=>`<span style="width:${a.c.size/total*100}%;background:var(${VCOLORS[i%VCOLORS.length]})" title="${esc(a.name)} · ${ipStr(a.c.net)}/${a.p}"></span>`).join('');
-  $('#v-key').innerHTML = placed.map((a,i)=>`<span style="--c:var(${VCOLORS[i%VCOLORS.length]})">${esc(a.name)} /${a.p}</span>`).join('') + (res.free.length?'<span style="--c:var(--sunken);">Free</span>':'');
-  if(res.overflow){ $('#v-err').hidden=false; $('#v-err').textContent=`Not everything fits. The plan needs ${fmt(res.needed)} addresses but /${res.p} holds ${fmt(total)}. Try a /${Math.max(0,32-Math.ceil(Math.log2(res.needed)))} or larger.`; }
-  else { $('#v-err').hidden=true; }
-  if(res.normalized){ $('#v-err').hidden=false; $('#v-err').textContent=(res.overflow?$('#v-err').textContent+' ':'')+`Host bits were set, so ${ipStr(res.base.net)}/${res.p} is used.`; }
-  $('#v-free').innerHTML = res.free.length ? `<span class="label">Free blocks left</span><div class="chips" style="margin-top:6px">${res.free.slice(0,12).map(f=>`<span class="chip">${ipStr(f.net)}/${f.p}</span>`).join('')}${res.free.length>12?`<span class="chip">+${res.free.length-12} more</span>`:''}</div>` : (res.overflow?'':'<span class="chip ok">The block is fully used</span>');
-  const head=['Name','Hosts needed','Usable','Subnet','Mask','Host range','Broadcast','Spare'];
-  $('#v-table').innerHTML='<thead><tr>'+head.map((h,i)=>`<th class="${[1,2,7].includes(i)?'r':''}">${h}</th>`).join('')+'</tr></thead><tbody>'+
-    vlsmTable(res).map((r,ri)=>{ const a=res.alloc[ri]; return a.fail ? `<tr><td>${esc(r[0])}</td><td class="mono r">${r[1]}</td><td class="mono r">${r[2]}</td><td colspan="5"><span class="chip bad">Does not fit</span></td></tr>` :
-      `<tr class="click" data-net="${r[3]}"><td>${esc(r[0])}</td><td class="mono r">${r[1]}</td><td class="mono r">${r[2]}</td><td class="mono">${r[3]}</td><td class="mono">${r[4]}</td><td class="mono">${r[5]}</td><td class="mono">${r[6]}</td><td class="mono r">${r[7]}</td></tr>`; }).join('')+'</tbody>';
+  $('#v-base').closest('.cv-box').classList.toggle('invalid',!!res.error);
+  vRows.forEach((r,i)=>{ const el=$('#v-need-'+i); if(!el) return; const h=Math.floor(+r.hosts); const p=h>=1?prefixForHosts(h):null;
+    el.textContent = p===null ? '—' : `/${p} · ${fmt(usableOf(p))} hosts`;
+    el.title = p===null ? 'Enter a host count of 1 or more' : `Smallest subnet with at least ${fmt(h)} usable hosts`; });
+  if(res.error){
+    $('#v-err').hidden=false; $('#v-err').textContent=res.error; $('#v-base-info').textContent='';
+    $('#v-status').innerHTML=''; $('#v-hero').innerHTML=''; $('#v-map').innerHTML=''; $('#v-ticks').innerHTML=''; $('#v-free').innerHTML=''; $('#v-table').innerHTML='';
+    return;
+  }
+  const total=res.base.size, used=res.used, free=total-used, placed=res.alloc.filter(a=>!a.fail);
+  const failed=new Set(res.alloc.filter(a=>a.fail).map(a=>a.i));
+  $$('#v-rows .vrow').forEach(el=>el.classList.toggle('fail', failed.has(+el.dataset.i)));
+  $('#v-base-info').textContent=`/${res.p} · ${fmt(total)} addresses`;
+  $('#v-err').hidden=!res.normalized; $('#v-err').textContent=res.normalized?`Host bits were set, so ${ipStr(res.base.net)}/${res.p} is used.`:'';
+
+  if(!vRows.length) $('#v-status').innerHTML='<span class="chip">Add a subnet to start</span>';
+  else if(res.overflow){
+    const np=Math.max(0,32-Math.ceil(Math.log2(res.needed))); const sug=(res.base.net & maskOf(np))>>>0;
+    $('#v-status').innerHTML=`<span class="chip bad">Too small: the plan needs ${fmt(res.needed)} addresses</span><button type="button" class="btn sm" data-suggest="${ipStr(sug)}/${np}">Use ${ipStr(sug)}/${np}</button>`;
+  } else $('#v-status').innerHTML=`<span class="chip ok">Everything fits in /${res.p}</span>${free?`<span class="chip">${fmt(free)} addresses left over</span>`:''}`;
+
+  const reqHosts=placed.reduce((s,a)=>s+a.hosts,0);
+  $('#v-hero').innerHTML=[['Allocated',`${fmt(used)} of ${fmt(total)}`],['Free',fmt(free)],['Subnets placed',`${placed.length} of ${res.alloc.length}`],['Host efficiency', used?Math.round(reqHosts/used*100)+'%':'—']]
+    .map(([k,v])=>`<div class="num"><span class="label">${k}</span><b>${v}</b></div>`).join('');
+
+  $('#v-map').innerHTML = placed.map(a=>{ const pct=a.c.size/total*100; return `<span style="width:${pct}%;--c:${vColor(a.i)}" title="${esc(a.name)} · ${ipStr(a.c.net)}/${a.p}"><em>${pct>=8?esc(a.name):''}</em></span>`; }).join('')
+    + (free>0 ? `<span class="free" style="width:${free/total*100}%" title="Free · ${fmt(free)} addresses"><em>${free/total>=.08?'Free':''}</em></span>` : '');
+  $('#v-ticks').innerHTML=`<span>${ipStr(res.base.net)}</span><span>${ipStr(res.base.bc)}</span>`;
+  $('#v-free').innerHTML = res.free.length ? `<span class="label">Free blocks you can still use</span><div class="chips" style="margin-top:6px">${res.free.slice(0,10).map(f=>`<span class="chip">${ipStr(f.net)}/${f.p}</span>`).join('')}${res.free.length>10?`<span class="chip">+${res.free.length-10} more</span>`:''}</div>` : '';
+
+  $('#v-table').innerHTML='<thead><tr><th>Subnet</th><th class="r">Hosts</th><th>Network</th><th>Host range</th><th>Broadcast</th><th>Mask</th><th>Usage</th></tr></thead><tbody>'+
+    (res.alloc.length ? res.alloc.map(a=>{ const sw=`<span class="sw" style="--c:${vColor(a.i)}"></span>`;
+      if(a.fail) return `<tr class="fail"><td>${sw}${esc(a.name)}</td><td class="mono r">${fmt(a.hosts)}</td><td class="mono">/${a.p}</td><td colspan="4">Does not fit in this block</td></tr>`;
+      const pct=Math.round(a.hosts/a.c.usable*100);
+      return `<tr class="click" data-net="${ipStr(a.c.net)}/${a.p}"><td>${sw}${esc(a.name)}</td><td class="mono r">${fmt(a.hosts)}</td><td class="mono">${ipStr(a.c.net)}/${a.p}</td><td class="mono">${ipStr(a.c.first)} – ${ipStr(a.c.last)}</td><td class="mono">${ipStr(a.c.bc)}</td><td class="mono">${ipStr(a.c.mask)}</td><td><span class="usage" style="--c:${vColor(a.i)}"><i style="width:${pct}%"></i></span><span class="mono small">${fmt(a.hosts)}/${fmt(a.c.usable)}</span></td></tr>`; }).join('')
+    : '<tr><td colspan="7" class="muted">Your plan appears here.</td></tr>')+'</tbody>';
   logHistory('vlsm', `VLSM ${ipStr(res.base.net)}/${res.p} · ${vRows.length} subnets`, vData());
 }
 function vData(){ return {base:$('#v-base').value.trim(), rows:vRows.map(r=>({name:r.name,hosts:+r.hosts}))}; }
+function vAddRow(){ vRows.push({name:'Subnet '+(vRows.length+1),hosts:10}); renderVRows(); renderVLSM(); const n=$(`#v-name-${vRows.length-1}`); n.focus(); n.select(); }
 $('#v-rows').addEventListener('input',e=>{ const t=e.target; if(t.dataset.i===undefined) return; vRows[+t.dataset.i][t.dataset.k] = t.dataset.k==='hosts' ? +t.value : t.value; renderVLSM(); });
+$('#v-rows').addEventListener('keydown',e=>{
+  const t=e.target; if(e.key!=='Enter' || t.dataset.i===undefined) return; e.preventDefault();
+  const i=+t.dataset.i;
+  if(t.dataset.k==='name') $(`#v-hosts-${i}`).select();
+  else if(i===vRows.length-1) vAddRow();
+  else { const n=$(`#v-name-${i+1}`); n.focus(); n.select(); }
+});
 $('#v-rows').addEventListener('click',e=>{ const b=e.target.closest('[data-del]'); if(!b) return; vRows.splice(+b.dataset.del,1); renderVRows(); renderVLSM(); });
-$('#v-add').onclick=()=>{ vRows.push({name:'Subnet '+(vRows.length+1),hosts:10}); renderVRows(); renderVLSM(); $(`#v-name-${vRows.length-1}`).select(); };
-$('#v-clear').onclick=()=>{ vRows=[]; renderVRows(); renderVLSM(); };
+$('#v-add').onclick=vAddRow;
+$('#v-clear').onclick=e=>{ const b=e.currentTarget; if(!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='Confirm clear'; setTimeout(()=>{ if(b.dataset.confirm){ delete b.dataset.confirm; b.textContent='Clear all'; } },3000); return; } delete b.dataset.confirm; b.textContent='Clear all'; vRows=[]; renderVRows(); renderVLSM(); };
 $('#v-base').addEventListener('input',renderVLSM);
+$('#v-presets').insertAdjacentHTML('beforeend', Object.keys(V_PRESETS).map(k=>`<button type="button" data-preset="${k}">${k}</button>`).join(''));
+$('#v-presets').addEventListener('click',e=>{ const b=e.target.closest('[data-preset]'); if(!b) return; const p=V_PRESETS[b.dataset.preset]; $('#v-base').value=p.base; vRows=p.rows.map(([name,hosts])=>({name,hosts})); renderVRows(); renderVLSM(); });
+$('#v-status').addEventListener('click',e=>{ const b=e.target.closest('[data-suggest]'); if(!b) return; $('#v-base').value=b.dataset.suggest; renderVLSM(); });
 $('#v-table').addEventListener('click',e=>{ const tr=e.target.closest('tr[data-net]'); if(!tr) return; const r=parseCIDR(tr.dataset.net); setCalc(r.ip,r.p); go('calc'); });
 $('#v-save').onclick=()=>{ const res=vResult; if(!res||res.error) return toast('Fix the address block first'); openSave('vlsm', `VLSM plan for ${ipStr(res.base.net)}/${res.p}`, vData()); };
 $('#v-export').onclick=()=>{ const res=vResult; if(!res||res.error) return toast('Fix the address block first');

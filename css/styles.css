@@ -44,7 +44,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 .wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 56px}
 h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
 h1{font-size:1.75rem;font-weight:700}
-h2{font-size:1.25rem;font-weight:600}
+h2{font-size:1rem;font-weight:600}
 h3{font-size:1rem;font-weight:600}
 p{margin:0}
 .mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}

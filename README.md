@@ -5,12 +5,11 @@ An IPv4 subnet calculator and subnetting practice tool. Plain HTML, CSS and Java
 ## Features
 
 - Subnet calculator: network, broadcast, host range, usable hosts, mask, wildcard, class, address type, reverse DNS zone
-- Number conversion: decimal, binary and hexadecimal with step-by-step working, IP address conversion and a drill
-- Mask converter (prefix, mask, wildcard or host count) and a /0-/32 reference table
 - VLSM planner with an address-space map and free blocks
-- Practice: a subnet worksheet (network, first host, last host, broadcast, next subnet) and a quick quiz
 - Saved calculations and history, stored in your browser
 - Export to CSV, Markdown, text or a printable report, and print
+
+Number conversion, the Mask converter and Practice are kept on the `full-version` branch for now.
 
 ## Project structure
 
@@ -22,10 +21,7 @@ js/helpers.js       DOM shortcuts, formatting, local storage, toast, clipboard, 
 js/storage.js       History (this browser) and saved calculations
 js/export.js        Dialogs and export formats (CSV, Markdown, text, HTML report)
 js/calculator.js    Subnet calculator page
-js/convert.js       Number conversion page
-js/masks.js         Mask converter page
 js/vlsm.js          VLSM planner page
-js/practice.js      Practice page: quick quiz and subnet worksheet
 js/saved.js         Saved & history page
 js/app.js           Sidebar, page header, theme, routing and start-up
 ```

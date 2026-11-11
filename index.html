@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="IPv4 subnet calculator with number conversion, mask converter, VLSM planner, practice worksheet and quiz.">
+<meta name="description" content="IPv4 subnet calculator with VLSM planner, saved calculations and history.">
 <title>Subnet Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,12 +18,8 @@
     <nav class="nav">
       <p class="nav-group">Calculate</p>
       <button class="nav-item" data-view="calc"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 18.5h8"/></svg><span>Calculator</span></button>
-      <button class="nav-item" data-view="convert"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 12 4 4-4 4"/><path d="M21 16H7"/></svg><span>Number conversion</span></button>
-      <button class="nav-item" data-view="masks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>Mask converter</span></button>
       <p class="nav-group">Plan</p>
       <button class="nav-item" data-view="vlsm"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 10h18M10 10v11M10 15.5h11"/></svg><span>VLSM planner</span></button>
-      <p class="nav-group">Learn</p>
-      <button class="nav-item" data-view="practice"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><span>Practice</span></button>
       <p class="nav-group">Library</p>
       <button class="nav-item" data-view="saved"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span>Saved &amp; history</span><span class="count" id="saved-count">0</span></button>
     </nav>
@@ -74,99 +70,6 @@
     </div>
   </section>
 
-  <!-- CONVERT -->
-  <section class="view" id="v-convert" data-view="convert" hidden>
-    <div class="panel cv-main">
-      <div class="cv-inputs">
-        <div class="cv-field" data-base="dec">
-          <label for="cv-dec"><span class="cv-tag">DEC</span>Decimal <small>base 10</small></label>
-          <div class="cv-box"><input type="text" id="cv-dec" value="200" inputmode="numeric" spellcheck="false" autocomplete="off"><button type="button" class="cv-copy" data-copy="dec" aria-label="Copy decimal value">Copy</button></div>
-        </div>
-        <div class="cv-field" data-base="bin">
-          <label for="cv-bin"><span class="cv-tag">BIN</span>Binary <small>base 2</small></label>
-          <div class="cv-box"><span class="pre" aria-hidden="true">0b</span><input type="text" id="cv-bin" inputmode="numeric" spellcheck="false" autocomplete="off"><button type="button" class="cv-copy" data-copy="bin" aria-label="Copy binary value">Copy</button></div>
-        </div>
-        <div class="cv-field" data-base="hex">
-          <label for="cv-hex"><span class="cv-tag">HEX</span>Hexadecimal <small>base 16</small></label>
-          <div class="cv-box"><span class="pre" aria-hidden="true">0x</span><input type="text" id="cv-hex" spellcheck="false" autocomplete="off"><button type="button" class="cv-copy" data-copy="hex" aria-label="Copy hexadecimal value">Copy</button></div>
-        </div>
-      </div>
-      <p class="err" id="cv-err" hidden></p>
-      <div class="chips cv-examples" id="cv-examples"><span class="label">Try</span></div>
-      <div class="cv-bits">
-        <div class="cv-bits-head"><span class="label">Place values · click a bit to flip it</span><span class="chip" id="cv-width"></span></div>
-        <div class="place-rows" id="oct-place"></div>
-        <p class="sum" id="cv-sum"></p>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><div><h2>Show the working</h2><p class="muted small">The method follows the box you type in. Pick another any time.</p></div></div>
-      <div class="cv-tabs" role="tablist" aria-label="Conversion method" id="cv-tabs">
-        <button type="button" role="tab" data-w="d2b">Decimal → binary</button>
-        <button type="button" role="tab" data-w="b2d">Binary → decimal</button>
-        <button type="button" role="tab" data-w="b2h">Binary ↔ hex</button>
-        <button type="button" role="tab" data-w="d2h">Decimal → hex</button>
-        <button type="button" role="tab" data-w="h2d">Hex → decimal</button>
-      </div>
-      <div id="cv-work" role="tabpanel"></div>
-    </div>
-
-    <div class="cols-even">
-      <div class="panel">
-        <div class="panel-head"><div><h2>Convert an IP address</h2><p class="muted small">Each octet converts on its own. Pick an octet to see its working.</p></div></div>
-        <div class="cv-box"><input type="text" id="cv-ip" value="192.168.1.10" spellcheck="false" autocomplete="off" aria-label="IP address to convert"></div>
-        <div class="tbl-wrap" style="margin-top:12px"><table id="cv-ip-table"></table></div>
-        <dl class="kv" id="cv-ip-kv" style="grid-template-columns:minmax(0,1fr);margin-top:8px"></dl>
-      </div>
-      <div class="panel">
-        <div class="panel-head"><h2>Conversion drill</h2><span class="chip" id="cv-score"></span></div>
-        <p class="qprompt" id="cv-prompt" style="font-size:1.15rem"></p>
-        <form id="cv-form" class="row" style="margin-top:14px" autocomplete="off">
-          <div class="field grow"><label class="label" for="cv-ans">Your answer</label><input type="text" class="mono" id="cv-ans" spellcheck="false"></div>
-          <button class="btn primary" type="submit" id="cv-check">Check</button>
-          <button class="btn" type="button" id="cv-next">Next</button>
-        </form>
-        <div id="cv-feedback"></div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><div><h2>Nibble reference</h2><p class="muted small">Every hex digit and its 4-bit pattern. Click one to convert it.</p></div></div>
-      <div class="nib-grid" id="cv-nibbles"></div>
-      <p class="label" style="margin-top:16px;margin-bottom:8px">Mask octet values</p>
-      <div class="tbl-wrap"><table id="cv-masks"></table></div>
-    </div>
-  </section>
-
-  <!-- MASKS -->
-  <section class="view" id="v-masks" data-view="masks" hidden>
-    <div class="panel mk-main">
-      <label class="label" for="mask-in" style="display:block;margin-bottom:7px">Prefix, subnet mask, wildcard or host count</label>
-      <div class="cv-box"><span class="cv-tag mk-kind" id="mask-kind">MASK</span><input type="text" id="mask-in" value="255.255.252.0" spellcheck="false" autocomplete="off"></div>
-      <p class="small muted" id="mask-detected" style="margin-top:8px"></p>
-      <p class="err" id="mask-err" hidden></p>
-      <div class="chips cv-examples" id="mask-examples"><span class="label">Try</span></div>
-      <div class="field" style="margin-top:16px">
-        <div style="display:flex;justify-content:space-between;gap:10px"><label class="label" for="mask-slider">Prefix length</label><span class="mono small" id="mask-slider-out"></span></div>
-        <input type="range" id="mask-slider" min="0" max="32" value="22">
-      </div>
-    </div>
-
-    <div class="mk-tiles" id="mask-tiles"></div>
-
-    <div class="panel">
-        <div class="panel-head"><h2>Mask in binary</h2><div class="legend"><span style="--c:var(--net)">Network</span><span style="--c:var(--host)">Host</span></div></div>
-        <div class="bits static" id="mask-bits"></div>
-        <p class="note" id="mask-block" style="margin-top:14px"></p>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head"><div><h2>Prefix reference</h2><p class="muted small">Every prefix from /32 to /0. Click a row to convert it.</p></div><button class="btn" id="mask-export">Export table</button></div>
-      <div class="tbl-wrap tbl-scroll" id="mask-table-wrap"><table id="mask-table"></table></div>
-    </div>
-  </section>
-
   <!-- VLSM -->
   <section class="view" id="v-vlsm" data-view="vlsm" hidden>
     <div class="panel">
@@ -201,78 +104,6 @@
     </div>
   </section>
 
-  <!-- PRACTICE -->
-  <section class="view" id="v-practice" data-view="practice" hidden>
-    <div class="row" style="justify-content:space-between;align-items:center">
-      <div class="seg" id="pr-mode" role="group" aria-label="Practice mode"><button data-mode="sheet">Subnet worksheet</button><button data-mode="quiz">Quick quiz</button></div>
-      <div class="seg lvl-seg" role="group" aria-label="Difficulty"><button data-level="easy">Easy</button><button data-level="medium">Medium</button><button data-level="hard">Hard</button></div>
-    </div>
-
-    <div id="pr-sheet" class="subview">
-      <div class="score" id="ws-score"></div>
-      <div class="cols">
-        <div class="panel">
-          <div class="ws-target">
-            <div><span class="label">Target IP address</span><div class="ws-ip mono" id="ws-target"></div></div>
-            <div><span class="label">Time</span><div class="mono" id="ws-timer" style="font-size:1.1rem">0:00</div></div>
-            <button class="btn primary" id="ws-next" style="margin-left:auto">Next problem</button>
-          </div>
-          <p class="note" style="margin-bottom:10px">For the target IP, solve for the network, first host, last host, broadcast and next subnet.</p>
-          <div class="tbl-wrap"><table class="ws-table"><thead><tr><th></th><th>Your answer</th><th>Correct?</th><th>Answer</th><th></th></tr></thead><tbody id="ws-body"></tbody></table></div>
-          <div class="row" style="margin-top:14px;align-items:center">
-            <button class="btn" id="ws-showall">Show all</button>
-            <button class="btn primary" id="ws-checkall">Check all</button>
-            <label class="check"><input type="checkbox" id="ws-autofill"> Auto-fill non-interesting octets</label>
-            <label class="check"><input type="checkbox" id="ws-autocheck"> Auto check</label>
-          </div>
-          <div id="ws-explain"></div>
-        </div>
-        <div class="panel">
-          <h2 style="margin-bottom:8px">How it works</h2>
-          <ul class="small muted ws-help">
-            <li>Type each octet. Press <kbd>.</kbd>, <kbd>/</kbd> or <kbd>Space</kbd> to jump to the next box. A box also advances after three digits.</li>
-            <li>Press <kbd>Enter</kbd> to go Check all → Show all → Next problem.</li>
-            <li>A problem counts as solved when all five rows are right without using Show.</li>
-            <li>Auto-fill copies in every octet except the interesting one, so you can drill the block-size step alone.</li>
-          </ul>
-          <p class="note" id="ws-level-note" style="margin-top:12px"></p>
-          <button class="btn ghost sm danger" id="ws-reset" style="margin-top:12px">Reset worksheet stats</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="pr-quiz" class="subview" hidden>
-    <div class="score" id="pr-score"></div>
-    <div class="cols">
-      <div class="qcard">
-        <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap"><span class="chip net" id="pr-type"></span><span class="label" id="pr-level-label"></span></div>
-        <p class="qprompt" id="pr-prompt"></p>
-        <form id="pr-form" style="margin-top:18px" autocomplete="off">
-          <div class="row" id="pr-answer-row">
-            <div class="field grow"><label class="label" for="pr-answer">Your answer</label><input type="text" class="big" id="pr-answer" spellcheck="false"></div>
-            <button class="btn primary" type="submit" id="pr-submit">Check</button>
-          </div>
-          <div class="row" id="pr-yesno" hidden>
-            <button class="btn" type="button" data-yn="yes">Yes, same subnet</button>
-            <button class="btn" type="button" data-yn="no">No, different subnets</button>
-          </div>
-        </form>
-        <div id="pr-feedback"></div>
-        <div class="row" style="margin-top:14px;justify-content:space-between">
-          <button class="btn ghost sm" id="pr-skip">Skip</button>
-          <button class="btn primary" id="pr-next" hidden>Next question</button>
-        </div>
-      </div>
-      <div class="panel">
-        <p class="note" id="pr-level-note" style="margin-bottom:16px"></p>
-        <h2 style="margin-bottom:10px">Question types</h2>
-        <div class="chips" id="pr-types"></div>
-        <button class="btn ghost sm danger" id="pr-reset" style="margin-top:16px">Reset score</button>
-      </div>
-    </div>
-    </div>
-  </section>
-
   <!-- SAVED -->
   <section class="view" id="v-saved" data-view="saved" hidden>
     <div class="cols-even">
@@ -303,10 +134,7 @@
 <script src="js/storage.js"></script>
 <script src="js/export.js"></script>
 <script src="js/calculator.js"></script>
-<script src="js/convert.js"></script>
-<script src="js/masks.js"></script>
 <script src="js/vlsm.js"></script>
-<script src="js/practice.js"></script>
 <script src="js/saved.js"></script>
 <script src="js/app.js"></script>
 

@@ -1,0 +1,1279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="IPv4 subnet calculator with binary view, mask converter, equal subnetting, VLSM planner, practice worksheet and quiz.">
+<title>Subnet Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: a patch-panel workbench. One header with tabbed tools; every tool reads as label/value rows and bit ribbons
+   where network bits are cobalt, host bits are amber and borrowed subnet bits are teal. */
+:root{
+  --bg:#F1F3F7; --surface:#FFFFFF; --sunken:#E8ECF3; --ink:#131A2B; --muted:#596277; --line:#D6DCE7;
+  --net:#2350D0; --net-soft:#DCE4FF; --net-ink:#FFFFFF;
+  --host:#B96F00; --host-soft:#FBEACB; --host-ink:#FFFFFF;
+  --sub:#0B8577; --sub-soft:#D0F0EA;
+  --ok:#16794A; --ok-soft:#DCF2E5; --bad:#B4282E; --bad-soft:#FBE0E1;
+  --shadow:0 1px 2px rgba(19,26,43,.06),0 4px 16px rgba(19,26,43,.05);
+  --f-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1220; --surface:#151C2D; --sunken:#1B2337; --ink:#E5E9F2; --muted:#97A2BA; --line:#273149;
+  --net:#7096FF; --net-soft:#1D2B55; --net-ink:#0D1220;
+  --host:#F0B142; --host-soft:#3D2E10; --host-ink:#0D1220;
+  --sub:#38C4AE; --sub-soft:#0F3530;
+  --ok:#4CC98A; --ok-soft:#123323; --bad:#F2777C; --bad-soft:#3B1719;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0D1220; --surface:#151C2D; --sunken:#1B2337; --ink:#E5E9F2; --muted:#97A2BA; --line:#273149;
+  --net:#7096FF; --net-soft:#1D2B55; --net-ink:#0D1220;
+  --host:#F0B142; --host-soft:#3D2E10; --host-ink:#0D1220;
+  --sub:#38C4AE; --sub-soft:#0F3530;
+  --ok:#4CC98A; --ok-soft:#123323; --bad:#F2777C; --bad-soft:#3B1719;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 56px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:1.75rem;font-weight:700}
+h2{font-size:1.25rem;font-weight:600}
+h3{font-size:1rem;font-weight:600}
+p{margin:0}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.label{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--net);outline-offset:2px}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:14px}
+.glyph{display:grid;grid-template-columns:repeat(4,8px);gap:2px}
+.glyph i{width:8px;height:8px;border-radius:2px;background:var(--net)}
+.glyph i.h{background:var(--host)}
+.tagline{color:var(--muted);font-size:.9rem}
+.tabs-scroll{overflow-x:auto;margin-bottom:20px;border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:2px;min-width:max-content}
+.tab{background:none;border:0;padding:10px 14px;cursor:pointer;color:var(--muted);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--net)}
+.tab .count{font-family:var(--f-mono);font-size:.75rem;background:var(--sunken);border-radius:10px;padding:1px 7px;margin-left:6px}
+
+/* panels */
+.view,.subview{display:grid;gap:18px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.panel-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+.cols-even{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+@media (max-width:900px){.cols,.cols-even{grid-template-columns:minmax(0,1fr)}}
+
+/* form controls */
+.field{display:grid;gap:6px;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.row > .grow{flex:1 1 220px}
+input[type=text],input[type=number],select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;min-width:0}
+input.big{font-family:var(--f-mono);font-size:1.25rem;padding:11px 13px}
+input.invalid{border-color:var(--bad)}
+input[type=range]{width:100%;accent-color:var(--net)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 13px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{background:var(--sunken)}
+.btn.primary{background:var(--net);border-color:var(--net);color:var(--net-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{border-color:transparent;background:none}
+.btn.danger{color:var(--bad)}
+.btn.sm{padding:5px 10px;font-size:.85rem}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:7px 12px;cursor:pointer;color:var(--muted)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--net-soft);color:var(--ink);font-weight:600}
+.err{color:var(--bad);font-size:.88rem}
+.note{font-size:.85rem;color:var(--muted)}
+
+/* bit ribbon */
+.bits{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.octet{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:2px}
+.bit{font-family:var(--f-mono);font-size:.8rem;display:flex;align-items:center;justify-content:center;height:30px;border-radius:4px;background:var(--host-soft);color:var(--ink);border:0;padding:0;cursor:pointer;min-width:0}
+.bit.n{background:var(--net-soft)}
+.bit.s{background:var(--sub-soft)}
+.bit.one.n{background:var(--net);color:var(--net-ink)}
+.bit.one.h{background:var(--host);color:var(--host-ink)}
+.bit.one.s{background:var(--sub);color:var(--net-ink)}
+.bit.edge{box-shadow:inset -2px 0 0 var(--ink)}
+.bit:hover{outline:1px solid var(--ink)}
+.bits.static .bit{cursor:default}.bits.static .bit:hover{outline:0}
+@media (max-width:620px){.bits{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.82rem;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--c)}
+
+/* key/value */
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 24px}
+@media (max-width:620px){.kv{grid-template-columns:minmax(0,1fr)}}
+.kv div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);min-width:0}
+.kv dt{color:var(--muted);font-size:.9rem;white-space:nowrap}
+.kv dd{margin:0;font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right;overflow-wrap:anywhere}
+.kv dd.copyable{cursor:copy}
+.hero-nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+@media (max-width:620px){.hero-nums{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.num{background:var(--sunken);border-radius:8px;padding:10px 12px;min-width:0}
+.num b{display:block;font-family:var(--f-mono);font-size:1.05rem;font-weight:600;overflow-wrap:anywhere}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:.78rem;font-weight:600;border-radius:999px;padding:2px 9px;background:var(--sunken);color:var(--ink)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.chip.net{background:var(--net-soft);color:var(--ink)}
+.chip.sub{background:var(--sub-soft);color:var(--ink)}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{padding:8px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);background:var(--sunken);font-weight:600;position:sticky;top:0}
+td.mono{font-family:var(--f-mono)}
+td.r,th.r{text-align:right}
+tbody tr:hover{background:var(--sunken)}
+tr.sel td{background:var(--net-soft)}
+tr.click{cursor:pointer}
+.tbl-scroll{max-height:460px;overflow:auto}
+
+/* history list */
+.list{display:grid;gap:6px}
+.item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);min-width:0}
+.item .t{min-width:0;overflow:hidden}
+.item .t b{display:block;font-family:var(--f-mono);font-weight:500;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .acts{display:flex;gap:4px;flex-shrink:0}
+.empty{padding:18px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:8px;font-size:.9rem}
+
+/* binary view */
+.brow{display:grid;grid-template-columns:120px minmax(0,1fr) 150px;gap:14px;align-items:center;padding:8px 0}
+.brow + .brow{border-top:1px dashed var(--line)}
+.brow .op{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.brow .dec{font-family:var(--f-mono);text-align:right;font-size:.95rem}
+@media (max-width:760px){.brow{grid-template-columns:minmax(0,1fr)}.brow .dec{text-align:left}}
+.place{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;max-width:520px}
+.place button{display:grid;gap:2px;justify-items:center;padding:8px 0;border:1px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer}
+.place button small{font-size:.7rem;color:var(--muted);font-family:var(--f-mono)}
+.place button b{font-family:var(--f-mono);font-size:1.1rem}
+.place button[aria-pressed="true"]{background:var(--net);border-color:var(--net);color:var(--net-ink)}
+.place button[aria-pressed="true"] small{color:var(--net-ink)}
+
+/* vlsm */
+.vrows{display:grid;gap:8px}
+.vrow{display:grid;grid-template-columns:minmax(0,1fr) 110px auto;gap:8px;align-items:center}
+.map{display:flex;height:34px;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:var(--sunken)}
+.map span{height:100%;border-right:1px solid var(--surface);min-width:2px;position:relative}
+.map-key{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;margin-top:8px}
+.map-key span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--c)}
+
+/* practice */
+.score{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media (max-width:620px){.score{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.qcard{border:1px solid var(--line);border-radius:10px;padding:22px;background:var(--surface)}
+.qprompt{font-family:var(--f-display);font-size:1.3rem;font-weight:600;line-height:1.35}
+.qprompt code{font-family:var(--f-mono);font-size:1.15rem;background:var(--net-soft);padding:1px 6px;border-radius:5px;font-weight:500}
+.feedback{border-radius:8px;padding:12px 14px;margin-top:14px;font-size:.92rem}
+.feedback.ok{background:var(--ok-soft)}
+.feedback.bad{background:var(--bad-soft)}
+.feedback b{font-family:var(--f-mono)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 11px;font-size:.82rem;cursor:pointer;color:var(--muted)}
+.chips button[aria-pressed="true"]{background:var(--net-soft);border-color:var(--net);color:var(--ink);font-weight:600}
+
+/* worksheet */
+.ws-target{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 28px;margin-bottom:12px}
+.ws-ip{font-size:1.6rem;font-weight:600;letter-spacing:-.01em}
+.ws-table th[scope=row]{text-transform:none;letter-spacing:0;font-size:.9rem;color:var(--ink);background:none;font-family:var(--f-body);position:static}
+.ws-table td{vertical-align:middle}
+.oct4{display:flex;align-items:center;gap:3px}
+.oct4 span{font-family:var(--f-mono);color:var(--muted)}
+.oct4 input{width:3.3em;text-align:center;font-family:var(--f-mono);font-size:.95rem;padding:7px 3px;border:1px solid var(--line);border-radius:6px;background:var(--surface);min-width:0}
+.oct4 input.auto{background:var(--sunken);color:var(--muted)}
+.oct4 input.good{border-color:var(--ok);background:var(--ok-soft);color:var(--ink)}
+.oct4 input.wrong{border-color:var(--bad);background:var(--bad-soft);color:var(--ink)}
+.ws-ans{font-family:var(--f-mono);min-width:9.5em}
+.check{display:inline-flex;align-items:center;gap:6px;font-size:.88rem;color:var(--muted);cursor:pointer}
+.check input{accent-color:var(--net)}
+.ws-help{margin:0;padding-left:18px;display:grid;gap:6px}
+kbd{font-family:var(--f-mono);font-size:.78rem;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;background:var(--surface);color:var(--ink)}
+
+/* modal + toast */
+.modal{position:fixed;inset:0;background:rgba(10,14,25,.45);display:flex;align-items:flex-start;justify-content:center;z-index:50;padding:max(40px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px));overflow:auto}
+.modal-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);display:grid;gap:14px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);border-radius:8px;padding:12px;font-family:var(--f-mono);font-size:.78rem;line-height:1.5}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;font-size:.88rem;z-index:60;max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion:no-preference){.toast{animation:pop .18s ease-out}@keyframes pop{from{transform:translate(-50%,8px);opacity:0}}}
+
+@media print{
+  .tabs-scroll,.btn,.no-print,.seg,input[type=range]{display:none!important}
+  .panel{box-shadow:none;border-color:#bbb}
+  body{background:#fff;color:#000}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="glyph" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i class="h"></i><i class="h"></i><i class="h"></i></div>
+      <div>
+        <h1>Subnet Calculator</h1>
+        <p class="tagline">IPv4 subnets, binary, masks, VLSM and practice</p>
+      </div>
+    </div>
+    <div class="legend" aria-label="Bit colors">
+      <span style="--c:var(--net)">Network bits</span>
+      <span style="--c:var(--sub)">Borrowed subnet bits</span>
+      <span style="--c:var(--host)">Host bits</span>
+    </div>
+  </header>
+
+  <div class="tabs-scroll">
+    <nav class="tabs" role="tablist" aria-label="Tools">
+      <button class="tab" role="tab" data-view="calc">Calculator</button>
+      <button class="tab" role="tab" data-view="binary">Binary view</button>
+      <button class="tab" role="tab" data-view="masks">Mask converter</button>
+      <button class="tab" role="tab" data-view="equal">Equal subnets</button>
+      <button class="tab" role="tab" data-view="vlsm">VLSM planner</button>
+      <button class="tab" role="tab" data-view="practice">Practice</button>
+      <button class="tab" role="tab" data-view="saved">Saved &amp; history<span class="count" id="saved-count">0</span></button>
+    </nav>
+  </div>
+
+  <!-- CALCULATOR -->
+  <section class="view" id="v-calc" data-view="calc">
+    <div class="cols">
+      <div class="panel">
+        <div class="row">
+          <div class="field grow">
+            <label class="label" for="calc-in">IP address with prefix or mask</label>
+            <input class="big" type="text" id="calc-in" value="192.168.10.77/26" spellcheck="false" autocomplete="off" placeholder="192.168.10.77/26">
+          </div>
+          <button class="btn" id="calc-save">Save</button>
+          <button class="btn" id="calc-export">Export</button>
+        </div>
+        <p class="err" id="calc-err" hidden></p>
+        <div class="field" style="margin-top:14px">
+          <div style="display:flex;justify-content:space-between;gap:10px"><label class="label" for="calc-prefix">Prefix length</label><span class="mono small" id="calc-prefix-out"></span></div>
+          <input type="range" id="calc-prefix" min="0" max="32" value="26">
+        </div>
+        <div style="margin-top:14px" class="field">
+          <span class="label">Address bits · click a bit to move the network/host boundary</span>
+          <div class="bits" id="calc-bits"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Recent</h3><button class="btn ghost sm" data-goto="saved">All</button></div>
+        <div class="list" id="calc-recent"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="hero-nums" id="calc-hero"></div>
+      <dl class="kv" id="calc-kv"></dl>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Does this subnet contain an address?</h3></div>
+      <div class="row">
+        <div class="field grow"><label class="label" for="calc-check">Address to check</label><input type="text" id="calc-check" class="mono" value="192.168.10.130" spellcheck="false"></div>
+        <div id="calc-check-out" style="padding-bottom:9px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BINARY -->
+  <section class="view" id="v-binary" data-view="binary" hidden>
+    <div class="panel">
+      <div class="panel-head">
+        <div><h2>Binary view</h2><p class="muted small">The network address is the IP AND the mask. The broadcast is the network OR the wildcard. Click any IP bit to flip it, or a mask bit to move the prefix.</p></div>
+        <button class="btn" id="bin-export">Export</button>
+      </div>
+      <div class="row" style="margin-bottom:12px">
+        <div class="field grow"><label class="label" for="bin-in">IP address with prefix</label><input type="text" id="bin-in" class="mono" spellcheck="false"></div>
+        <div class="field" style="flex:0 1 220px"><label class="label" for="bin-prefix">Prefix <span id="bin-prefix-out" class="mono"></span></label><input type="range" id="bin-prefix" min="0" max="32"></div>
+      </div>
+      <div id="bin-rows"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h3>Octet converter</h3><p class="muted small">Toggle the place values or type a number from 0 to 255.</p></div></div>
+      <div class="row" style="margin-bottom:12px;align-items:center">
+        <div class="field" style="width:120px"><label class="label" for="oct-dec">Decimal</label><input type="number" id="oct-dec" min="0" max="255" value="192" class="mono"></div>
+        <div class="field"><span class="label">Binary</span><span class="mono" id="oct-bin" style="font-size:1.2rem"></span></div>
+        <div class="field"><span class="label">Hex</span><span class="mono" id="oct-hex" style="font-size:1.2rem"></span></div>
+      </div>
+      <div class="place" id="oct-place"></div>
+      <p class="note" id="oct-sum" style="margin-top:10px"></p>
+    </div>
+  </section>
+
+  <!-- MASKS -->
+  <section class="view" id="v-masks" data-view="masks" hidden>
+    <div class="cols-even">
+      <div class="panel">
+        <h2 style="margin-bottom:4px">Mask converter</h2>
+        <p class="muted small" style="margin-bottom:12px">Type a prefix (<span class="mono">/22</span>), a subnet mask (<span class="mono">255.255.252.0</span>), a wildcard (<span class="mono">0.0.3.255</span>) or a host count (<span class="mono">500 hosts</span>).</p>
+        <input type="text" class="big" id="mask-in" value="255.255.252.0" spellcheck="false" autocomplete="off">
+        <p class="small muted" id="mask-detected" style="margin-top:8px"></p>
+        <p class="err" id="mask-err" hidden></p>
+      </div>
+      <div class="panel">
+        <dl class="kv" id="mask-kv" style="grid-template-columns:minmax(0,1fr)"></dl>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><div><h3>Prefix reference</h3><p class="muted small">Click a row to convert it.</p></div><button class="btn" id="mask-export">Export table</button></div>
+      <div class="tbl-wrap tbl-scroll"><table id="mask-table"></table></div>
+    </div>
+  </section>
+
+  <!-- EQUAL -->
+  <section class="view" id="v-equal" data-view="equal" hidden>
+    <div class="panel">
+      <div class="panel-head"><h2>Equal subnetting</h2><div class="row"><button class="btn" id="eq-save">Save</button><button class="btn" id="eq-export">Export</button></div></div>
+      <div class="row">
+        <div class="field grow"><label class="label" for="eq-net">Network to divide</label><input type="text" class="mono" id="eq-net" value="172.16.0.0/22" spellcheck="false"></div>
+        <div class="field"><span class="label">Divide by</span><div class="seg" id="eq-mode"><button data-mode="subnets" aria-pressed="true">Number of subnets</button><button data-mode="hosts" aria-pressed="false">Hosts per subnet</button></div></div>
+        <div class="field" style="width:150px"><label class="label" for="eq-val" id="eq-val-label">Subnets needed</label><input type="number" class="mono" id="eq-val" value="6" min="1"></div>
+      </div>
+      <p class="err" id="eq-err" hidden></p>
+      <p class="note" id="eq-note" style="margin-top:8px"></p>
+    </div>
+    <div class="panel" id="eq-out-panel">
+      <div class="hero-nums" id="eq-hero"></div>
+      <div class="field" style="margin-bottom:14px"><span class="label">Prefix split</span><div class="bits static" id="eq-bits"></div></div>
+      <div class="tbl-wrap tbl-scroll"><table id="eq-table"></table></div>
+      <p class="note" id="eq-more" style="margin-top:8px"></p>
+    </div>
+  </section>
+
+  <!-- VLSM -->
+  <section class="view" id="v-vlsm" data-view="vlsm" hidden>
+    <div class="cols-even">
+      <div class="panel">
+        <div class="panel-head"><h2>VLSM planner</h2><div class="row"><button class="btn" id="v-save">Save</button><button class="btn" id="v-export">Export</button></div></div>
+        <div class="field" style="margin-bottom:14px"><label class="label" for="v-base">Address block</label><input type="text" class="mono" id="v-base" value="10.20.0.0/22" spellcheck="false"></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span class="label">Subnet name</span><span class="label" style="margin-right:84px">Hosts</span></div>
+        <div class="vrows" id="v-rows"></div>
+        <div class="row" style="margin-top:10px"><button class="btn sm" id="v-add">Add subnet</button><button class="btn ghost sm" id="v-clear">Clear all</button></div>
+      </div>
+      <div class="panel">
+        <h3 style="margin-bottom:10px">Allocation</h3>
+        <div class="hero-nums" id="v-hero" style="grid-template-columns:repeat(2,minmax(0,1fr))"></div>
+        <div class="map" id="v-map" aria-label="Address space map"></div>
+        <div class="map-key" id="v-key"></div>
+        <p class="err" id="v-err" hidden style="margin-top:10px"></p>
+        <div id="v-free" style="margin-top:12px"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="note" style="margin-bottom:10px">Subnets are placed largest first so every block lands on its natural boundary. Each one is sized to the smallest prefix whose usable hosts cover the request.</p>
+      <div class="tbl-wrap"><table id="v-table"></table></div>
+    </div>
+  </section>
+
+  <!-- PRACTICE -->
+  <section class="view" id="v-practice" data-view="practice" hidden>
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <div class="seg" id="pr-mode" role="group" aria-label="Practice mode"><button data-mode="sheet">Subnet worksheet</button><button data-mode="quiz">Quick quiz</button></div>
+      <div class="seg lvl-seg" role="group" aria-label="Difficulty"><button data-level="easy">Easy</button><button data-level="medium">Medium</button><button data-level="hard">Hard</button></div>
+    </div>
+
+    <div id="pr-sheet" class="subview">
+      <div class="score" id="ws-score"></div>
+      <div class="cols">
+        <div class="panel">
+          <div class="ws-target">
+            <div><span class="label">Target IP address</span><div class="ws-ip mono" id="ws-target"></div></div>
+            <div><span class="label">Time</span><div class="mono" id="ws-timer" style="font-size:1.1rem">0:00</div></div>
+            <button class="btn primary" id="ws-next" style="margin-left:auto">Next problem</button>
+          </div>
+          <p class="note" style="margin-bottom:10px">For the target IP, solve for the network, first host, last host, broadcast and next subnet.</p>
+          <div class="tbl-wrap"><table class="ws-table"><thead><tr><th></th><th>Your answer</th><th>Correct?</th><th>Answer</th><th></th></tr></thead><tbody id="ws-body"></tbody></table></div>
+          <div class="row" style="margin-top:14px;align-items:center">
+            <button class="btn" id="ws-showall">Show all</button>
+            <button class="btn primary" id="ws-checkall">Check all</button>
+            <label class="check"><input type="checkbox" id="ws-autofill"> Auto-fill non-interesting octets</label>
+            <label class="check"><input type="checkbox" id="ws-autocheck"> Auto check</label>
+          </div>
+          <div id="ws-explain"></div>
+        </div>
+        <div class="panel">
+          <h3 style="margin-bottom:8px">How it works</h3>
+          <ul class="small muted ws-help">
+            <li>Type each octet. Press <kbd>.</kbd>, <kbd>/</kbd> or <kbd>Space</kbd> to jump to the next box. A box also advances after three digits.</li>
+            <li>Press <kbd>Enter</kbd> to go Check all → Show all → Next problem.</li>
+            <li>A problem counts as solved when all five rows are right without using Show.</li>
+            <li>Auto-fill copies in every octet except the interesting one, so you can drill the block-size step alone.</li>
+          </ul>
+          <p class="note" id="ws-level-note" style="margin-top:12px"></p>
+          <button class="btn ghost sm danger" id="ws-reset" style="margin-top:12px">Reset worksheet stats</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="pr-quiz" class="subview" hidden>
+    <div class="score" id="pr-score"></div>
+    <div class="cols">
+      <div class="qcard">
+        <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap"><span class="chip net" id="pr-type"></span><span class="label" id="pr-level-label"></span></div>
+        <p class="qprompt" id="pr-prompt"></p>
+        <form id="pr-form" style="margin-top:18px" autocomplete="off">
+          <div class="row" id="pr-answer-row">
+            <div class="field grow"><label class="label" for="pr-answer">Your answer</label><input type="text" class="big" id="pr-answer" spellcheck="false"></div>
+            <button class="btn primary" type="submit" id="pr-submit">Check</button>
+          </div>
+          <div class="row" id="pr-yesno" hidden>
+            <button class="btn" type="button" data-yn="yes">Yes, same subnet</button>
+            <button class="btn" type="button" data-yn="no">No, different subnets</button>
+          </div>
+        </form>
+        <div id="pr-feedback"></div>
+        <div class="row" style="margin-top:14px;justify-content:space-between">
+          <button class="btn ghost sm" id="pr-skip">Skip</button>
+          <button class="btn primary" id="pr-next" hidden>Next question</button>
+        </div>
+      </div>
+      <div class="panel">
+        <p class="note" id="pr-level-note" style="margin-bottom:16px"></p>
+        <h3 style="margin-bottom:10px">Question types</h3>
+        <div class="chips" id="pr-types"></div>
+        <button class="btn ghost sm danger" id="pr-reset" style="margin-top:16px">Reset score</button>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <!-- SAVED -->
+  <section class="view" id="v-saved" data-view="saved" hidden>
+    <div class="cols-even">
+      <div class="panel">
+        <div class="panel-head"><div><h2>Saved</h2><p class="small muted" id="saved-where"></p></div><button class="btn sm" id="saved-export">Export all</button></div>
+        <div class="list" id="saved-list"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><div><h2>History</h2><p class="small muted">Your last 40 calculations, kept in this browser.</p></div><button class="btn ghost sm danger" id="hist-clear">Clear</button></div>
+        <div class="list" id="hist-list"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head"><h3 id="modal-title"></h3><button class="btn ghost sm" id="modal-close" aria-label="Close">Close</button></div>
+    <div id="modal-body" style="display:grid;gap:12px"></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ================= IPv4 core ================= */
+const MAX = 4294967295;
+function parseIP(s){
+  const m = String(s).trim().match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if(!m) return null;
+  let n = 0;
+  for(let i=1;i<=4;i++){ const o = +m[i]; if(o>255) return null; n = n*256 + o; }
+  return n;
+}
+const ipStr = n => [n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
+const maskOf = p => p===0 ? 0 : (0xFFFFFFFF << (32-p))>>>0;
+const wildOf = p => (~maskOf(p))>>>0;
+function popcount(n){ let c=0; while(n){ c += n & 1; n >>>= 1; } return c; }
+function maskToPrefix(m){ const inv=(~m)>>>0; if((inv & (inv+1))!==0) return null; return 32 - popcount(inv); }
+const bin32 = n => n.toString(2).padStart(32,'0');
+const binDots = n => bin32(n).match(/.{8}/g).join('.');
+const hex = n => '0x' + n.toString(16).toUpperCase().padStart(8,'0');
+const fmt = n => Number(n).toLocaleString('en-US');
+const usableOf = p => p===32 ? 1 : p===31 ? 2 : 2**(32-p) - 2;
+function hostsToPrefix(h){ for(let p=30;p>=0;p--){ if(2**(32-p)-2 >= h) return p; } return null; }
+// smallest prefix: iterate from 30 downward (larger blocks) and return first that fits
+function prefixForHosts(h){ if(h<1) return null; for(let p=30;p>=1;p--){ if(2**(32-p)-2 >= h) return p; } return null; }
+function classOf(n){ const o=n>>>24; return o<128?'A':o<192?'B':o<224?'C':o<240?'D (multicast)':'E (reserved)'; }
+const RANGES = [
+  ['255.255.255.255',32,'Limited broadcast'],
+  ['0.0.0.0',8,'"This" network (reserved)'],
+  ['10.0.0.0',8,'Private (RFC 1918)'],
+  ['100.64.0.0',10,'Carrier-grade NAT (RFC 6598)'],
+  ['127.0.0.0',8,'Loopback'],
+  ['169.254.0.0',16,'Link-local (APIPA)'],
+  ['172.16.0.0',12,'Private (RFC 1918)'],
+  ['192.0.2.0',24,'Documentation (TEST-NET-1)'],
+  ['192.168.0.0',16,'Private (RFC 1918)'],
+  ['198.18.0.0',15,'Benchmarking (RFC 2544)'],
+  ['198.51.100.0',24,'Documentation (TEST-NET-2)'],
+  ['203.0.113.0',24,'Documentation (TEST-NET-3)'],
+  ['224.0.0.0',4,'Multicast'],
+  ['240.0.0.0',4,'Reserved (Class E)'],
+].map(([a,p,l])=>({net:parseIP(a),p,l}));
+function typeOf(n){ for(const r of RANGES){ if(((n & maskOf(r.p))>>>0)===r.net) return r.l; } return 'Public'; }
+const isPrivate = n => typeOf(n).startsWith('Private');
+
+function calc(ip,p){
+  const mask=maskOf(p), wild=wildOf(p);
+  const net=(ip & mask)>>>0, bc=(net | wild)>>>0, size=2**(32-p);
+  let first, last;
+  if(p>=31){ first=net; last=bc; } else { first=net+1; last=bc-1; }
+  return {ip,p,mask,wild,net,bc,size,usable:usableOf(p),first,last,
+    prev: net - size >= 0 ? net - size : null,
+    next: bc + 1 <= MAX ? bc + 1 : null};
+}
+function defaultPrefix(ip){ const o=ip>>>24; return o<128?8:o<192?16:o<224?24:32; }
+function parseCIDR(str){
+  const s = String(str).trim().replace(/\s+/g,' ');
+  if(!s) return {error:'Enter an address such as 192.168.1.10/24.'};
+  let m = s.match(/^([\d.]+)\s*(?:\/|\s)\s*([\d.]+)$/);
+  let ipPart, pPart;
+  if(m){ ipPart=m[1]; pPart=m[2]; } else { ipPart=s; }
+  const ip = parseIP(ipPart);
+  if(ip===null) return {error:`"${ipPart}" is not a valid IPv4 address. Use four numbers from 0 to 255, like 10.0.4.20.`};
+  if(pPart===undefined) return {ip, p:defaultPrefix(ip), implied:true};
+  if(/^\d{1,2}$/.test(pPart)){ const p=+pPart; if(p>32) return {error:'The prefix must be between 0 and 32.'}; return {ip,p}; }
+  const mm = parseIP(pPart);
+  if(mm===null) return {error:`"${pPart}" is not a prefix or a subnet mask.`};
+  const p = maskToPrefix(mm);
+  if(p===null) return {error:`${pPart} is not a valid mask. The 1 bits must be contiguous from the left.`};
+  return {ip,p};
+}
+function reverseZone(net,p){
+  const o=[net>>>24,(net>>>16)&255,(net>>>8)&255,net&255];
+  const k = Math.max(1, Math.floor(p/8));
+  return o.slice(0,Math.min(k,4)).reverse().join('.') + '.in-addr.arpa';
+}
+function rangeToCidrs(start,end){
+  const out=[];
+  while(start<=end){
+    let p=32;
+    while(p>0){ const size=2**(32-(p-1)); if(start % size !== 0 || start+size-1 > end) break; p--; }
+    out.push({net:start,p}); start += 2**(32-p);
+  }
+  return out;
+}
+function explainBlock(ip,p){
+  const c=calc(ip,p);
+  if(p%8===0) return `/${p} ends on an octet boundary, so the first ${p/8} octet${p/8===1?'':'s'} stay as they are. Host octets become 0 for the network (${ipStr(c.net)}) and 255 for the broadcast (${ipStr(c.bc)}).`;
+  const k=Math.floor(p/8), sh=24-8*k;
+  const mo=(c.mask>>>sh)&255, block=256-mo, x=(ip>>>sh)&255, start=Math.floor(x/block)*block;
+  return `The interesting octet is octet ${k+1}, where the mask is ${mo}. Block size = 256 − ${mo} = ${block}. ${x} falls in the block ${start}–${start+block-1}, so the network is ${ipStr(c.net)} and the broadcast is ${ipStr(c.bc)}.`;
+}
+
+/* ================= helpers ================= */
+const $ = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const LS = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+let toastTimer;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.hidden=true,2200); }
+async function copyText(text, el){
+  try{ await navigator.clipboard.writeText(text); toast('Copied'); }
+  catch(e){
+    if(el){ el.focus(); if(el.select) el.select(); else { const r=document.createRange(); r.selectNodeContents(el); const s=getSelection(); s.removeAllRanges(); s.addRange(r); } }
+    toast('Press Ctrl/Cmd+C to copy the selected text');
+  }
+}
+function timeAgo(t){ const s=(Date.now()-t)/1000; if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+' min ago'; if(s<86400) return Math.floor(s/3600)+' h ago'; return new Date(t).toLocaleDateString(); }
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+function renderBits(el, value, prefix, opts={}){
+  const s = bin32(value); const base = opts.base ?? prefix;
+  let html='';
+  for(let o=0;o<4;o++){
+    html+='<div class="octet">';
+    for(let b=0;b<8;b++){
+      const i=o*8+b, one=s[i]==='1';
+      const cls = i<base ? 'n' : i<prefix ? 's' : 'h';
+      const edge = (i===prefix-1 && prefix<32) ? ' edge' : '';
+      html+=`<button type="button" class="bit ${cls}${one?' one':''}${edge}" data-i="${i}" ${opts.static?'tabindex="-1"':''} title="Bit ${i+1} · ${cls==='n'?'network':cls==='s'?'subnet':'host'}">${s[i]}</button>`;
+    }
+    html+='</div>';
+  }
+  el.innerHTML=html;
+}
+
+/* ================= storage: history + saved ================= */
+let history = LS.get('sc.history', []);
+const histTimers = {};
+let booting = true;
+function logHistory(kind,label,data){
+  if(booting) return;
+  clearTimeout(histTimers[kind]);
+  histTimers[kind] = setTimeout(()=>{
+    if(history[0] && history[0].kind===kind && history[0].label===label) return;
+    history.unshift({id:uid(),kind,label,data,at:Date.now()});
+    history = history.slice(0,40);
+    LS.set('sc.history',history); renderHistory(); renderRecent();
+  }, 1200);
+}
+
+const Saved = {
+  items: LS.get('sc.saved', []).map(x=>({...x,local:true})),
+  col: null,
+  async init(){
+    if(!window.claude || typeof window.claude.use!=='function') return;
+    try{
+      const [db,user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+      if(!db || !user) return;
+      const id = await user.id(); if(!id) return;
+      const col = db.collection('data/users/'+id);
+      let migrated=false;
+      col.onSnapshot(snap=>{
+        this.col = col;
+        const remote = snap.docs.filter(d=>d.exists).map(d=>({...d.data(), id:d.id}));
+        const ids = new Set(remote.map(r=>r.id));
+        const local = LS.get('sc.saved',[]).filter(l=>!ids.has(l.id));
+        LS.set('sc.saved', local);
+        this.items = [...remote, ...local.map(x=>({...x,local:true}))].sort((a,b)=>b.at-a.at);
+        renderSaved();
+        if(!migrated){ migrated=true; local.forEach(it=>{ const {local:_, id, ...rest}=it; col.doc(id).set(rest).catch(()=>{}); }); }
+      }, ()=>{ this.col=null; renderSaved(); });
+    }catch(e){ this.col=null; }
+  },
+  async add(kind,name,data){
+    const item={kind,name,data,at:Date.now()}; const id=uid();
+    if(this.col){
+      try{ await this.col.doc(id).set(item); toast('Saved'); return; }
+      catch(e){ /* fall through to local */ }
+    }
+    const local=LS.get('sc.saved',[]); local.unshift({...item,id}); LS.set('sc.saved',local);
+    this.items.unshift({...item,id,local:true}); renderSaved(); toast('Saved in this browser');
+  },
+  async remove(it){
+    if(!it.local && this.col){ try{ await this.col.doc(it.id).delete(); }catch(e){ toast('Could not delete. Try again.'); return; } }
+    LS.set('sc.saved', LS.get('sc.saved',[]).filter(x=>x.id!==it.id));
+    this.items = this.items.filter(x=>x.id!==it.id); renderSaved(); toast('Deleted');
+  },
+  async rename(it,name){
+    if(!it.local && this.col){ try{ await this.col.doc(it.id).update({name}); }catch(e){ toast('Could not rename.'); return; } }
+    else { LS.set('sc.saved', LS.get('sc.saved',[]).map(x=>x.id===it.id?{...x,name}:x)); }
+    it.name=name; renderSaved();
+  }
+};
+
+/* ================= modal / export ================= */
+let downloads = null;
+function openModal(title, bodyHTML){
+  $('#modal-title').textContent=title; $('#modal-body').innerHTML=bodyHTML; $('#modal').hidden=false;
+  const f=$('#modal-body input, #modal-body button'); if(f) f.focus();
+}
+function closeModal(){ $('#modal').hidden=true; }
+$('#modal-close').onclick=closeModal;
+$('#modal').addEventListener('click',e=>{ if(e.target.id==='modal') closeModal(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('#modal').hidden) closeModal(); });
+
+function csvCell(v){ v=String(v); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; }
+function sectionsOf(ex){ return ex.sections || [{kv:ex.kv, table:ex.table}]; }
+function toCSV(ex){
+  const out=[];
+  sectionsOf(ex).forEach((s,i)=>{
+    if(i) out.push('');
+    if(s.heading) out.push(csvCell(s.heading));
+    if(s.kv){ out.push('Field,Value'); s.kv.forEach(([k,v])=>out.push(csvCell(k)+','+csvCell(v))); }
+    if(s.table){ out.push(s.table.head.map(csvCell).join(',')); s.table.rows.forEach(r=>out.push(r.map(csvCell).join(','))); }
+  });
+  return out.join('\n');
+}
+function toText(ex){
+  const out=[ex.title, '='.repeat(ex.title.length), ''];
+  sectionsOf(ex).forEach(s=>{
+    if(s.heading){ out.push(s.heading, '-'.repeat(s.heading.length)); }
+    if(s.kv){ const w=Math.max(...s.kv.map(r=>r[0].length)); s.kv.forEach(([k,v])=>out.push(k.padEnd(w+2)+v)); }
+    if(s.table){
+      const all=[s.table.head,...s.table.rows]; const w=s.table.head.map((_,i)=>Math.max(...all.map(r=>String(r[i]).length)));
+      all.forEach((r,ri)=>{ out.push(r.map((c,i)=>String(c).padEnd(w[i])).join('  ').trimEnd()); if(ri===0) out.push(w.map(x=>'-'.repeat(x)).join('  ')); });
+    }
+    out.push('');
+  });
+  if(ex.notes) out.push(ex.notes);
+  return out.join('\n');
+}
+function toMD(ex){
+  const out=['# '+ex.title,''];
+  sectionsOf(ex).forEach(s=>{
+    if(s.heading) out.push('## '+s.heading,'');
+    if(s.kv){ out.push('| Field | Value |','|---|---|'); s.kv.forEach(([k,v])=>out.push(`| ${k} | \`${v}\` |`)); out.push(''); }
+    if(s.table){ out.push('| '+s.table.head.join(' | ')+' |','|'+s.table.head.map(()=>'---').join('|')+'|'); s.table.rows.forEach(r=>out.push('| '+r.join(' | ')+' |')); out.push(''); }
+  });
+  if(ex.notes) out.push(ex.notes);
+  return out.join('\n');
+}
+function toHTML(ex){
+  let body='';
+  sectionsOf(ex).forEach(s=>{
+    if(s.heading) body+=`<h2>${esc(s.heading)}</h2>`;
+    if(s.kv) body+='<table class="kv">'+s.kv.map(([k,v])=>`<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')+'</table>';
+    if(s.table) body+='<table><thead><tr>'+s.table.head.map(h=>`<th>${esc(h)}</th>`).join('')+'</tr></thead><tbody>'+s.table.rows.map(r=>'<tr>'+r.map(c=>`<td>${esc(c)}</td>`).join('')+'</tr>').join('')+'</tbody></table>';
+  });
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(ex.title)}</title>
+<style>body{font:14px/1.5 -apple-system,"Segoe UI",Inter,sans-serif;color:#131a2b;max-width:900px;margin:32px auto;padding:0 20px}h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:24px 0 8px}.meta{color:#596277;margin-bottom:20px}table{border-collapse:collapse;width:100%;margin-bottom:8px}th,td{border:1px solid #d6dce7;padding:6px 9px;text-align:left;font-family:"JetBrains Mono",Menlo,Consolas,monospace;font-size:12.5px}thead th{background:#e8ecf3;font-family:inherit;font-size:11px;text-transform:uppercase;letter-spacing:.06em}table.kv th{width:34%;background:#f1f3f7;font-family:inherit;font-size:13px}.tip{color:#596277;font-size:12px;margin-top:24px}@media print{.tip{display:none}body{margin:0}}</style></head>
+<body><h1>${esc(ex.title)}</h1><p class="meta">Generated ${new Date().toLocaleString()} · Subnet Calculator</p>${body}${ex.notes?`<p>${esc(ex.notes)}</p>`:''}<p class="tip">Use your browser's Print command (Ctrl/Cmd+P) to print this report or save it as PDF.</p></body></html>`;
+}
+function browserDownload(name, text){
+  const types={csv:'text/csv',md:'text/markdown',txt:'text/plain',html:'text/html'};
+  const blob=new Blob([text],{type:(types[name.split('.').pop()]||'text/plain')+';charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); document.body.removeChild(a); },1000); toast('Downloaded');
+}
+function slug(s){ return s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60) || 'subnet'; }
+function openExport(ex){
+  const fname = slug(ex.title);
+  const dl = true;
+  openModal('Export · '+ex.title, `
+    ${dl ? `<div><span class="label">Download a file</span><div class="row" style="margin-top:6px">
+      <button class="btn" data-dl="csv">CSV</button><button class="btn" data-dl="md">Markdown</button><button class="btn" data-dl="txt">Plain text</button><button class="btn primary" data-dl="html">Printable report (.html)</button>${downloads?'':'<button class="btn" id="ex-print">Print</button>'}</div>
+      <p class="note" style="margin-top:6px">Open the printable report in your browser and print it or save it as PDF.</p></div>`
+      : `<p class="note">File downloads aren't available in this view. Copy the export instead.</p>`}
+    <div><span class="label">Copy to clipboard</span><div class="row" style="margin-top:6px">
+      <button class="btn" data-cp="txt">Text</button><button class="btn" data-cp="csv">CSV</button><button class="btn" data-cp="md">Markdown</button></div></div>
+    <pre class="preview" id="ex-preview" tabindex="0">${esc(toText(ex))}</pre>`);
+  const gen = {csv:toCSV, md:toMD, txt:toText, html:toHTML};
+  $$('#modal-body [data-dl]').forEach(b=>b.onclick=async()=>{
+    const f=b.dataset.dl;
+    if(!downloads){ browserDownload(`${fname}.${f}`, gen[f](ex)); return; }
+    try{ await downloads.save({filename:`${fname}.${f}`, data:gen[f](ex)}); toast('Downloaded'); }
+    catch(e){ if(e && e.code==='declined') return; if(e && e.code==='rate_limited') toast('A save prompt is already open'); else toast('Download unavailable here. Use Copy instead.'); }
+  });
+  const pb=$('#ex-print'); if(pb) pb.onclick=()=>{ const w=window.open('','_blank'); if(!w){ toast('Allow pop-ups to print'); return; } w.document.write(toHTML(ex)); w.document.close(); w.focus(); setTimeout(()=>w.print(),300); };
+  $$('#modal-body [data-cp]').forEach(b=>b.onclick=()=>{ const t=gen[b.dataset.cp](ex); $('#ex-preview').textContent=t; copyText(t,$('#ex-preview')); });
+}
+function openSave(kind, defName, data){
+  openModal('Save calculation', `
+    <form id="save-form" style="display:grid;gap:12px">
+      <div class="field"><label class="label" for="save-name">Name</label><input type="text" id="save-name" value="${esc(defName)}" maxlength="80"></div>
+      <div class="row" style="justify-content:flex-end"><button type="button" class="btn ghost" id="save-cancel">Cancel</button><button class="btn primary" type="submit">Save</button></div>
+    </form>`);
+  const inp=$('#save-name'); inp.select();
+  $('#save-cancel').onclick=closeModal;
+  $('#save-form').onsubmit=e=>{ e.preventDefault(); Saved.add(kind, inp.value.trim()||defName, data); closeModal(); };
+}
+
+/* ================= CALCULATOR ================= */
+const state = { ip: parseIP('192.168.10.77'), p: 26 };
+function setCalc(ip,p,{from}={}){
+  state.ip=ip; state.p=p;
+  const txt = ipStr(ip)+'/'+p;
+  if(from!=='calc-in') $('#calc-in').value = txt;
+  if(from!=='bin-in') $('#bin-in').value = txt;
+  $('#calc-in').classList.remove('invalid'); $('#calc-err').hidden=true;
+  renderCalc(); renderBinary();
+  logHistory('calc', txt, {input:txt});
+}
+function calcKV(){
+  const c=calc(state.ip,state.p);
+  return [
+    ['IP address', ipStr(c.ip)], ['CIDR notation', ipStr(c.net)+'/'+c.p],
+    ['Network address', ipStr(c.net)], ['Broadcast address', ipStr(c.bc)],
+    ['First usable host', ipStr(c.first)], ['Last usable host', ipStr(c.last)],
+    ['Usable hosts', fmt(c.usable) + (c.p===31?' (point-to-point, RFC 3021)':c.p===32?' (single host)':'')],
+    ['Total addresses', fmt(c.size)],
+    ['Subnet mask', ipStr(c.mask)], ['Wildcard mask', ipStr(c.wild)],
+    ['Prefix length', '/'+c.p], ['Address class', classOf(c.ip)],
+    ['Address type', typeOf(c.ip)], ['Reverse DNS zone', reverseZone(c.net,c.p)],
+    ['Previous subnet', c.prev===null?'—':ipStr(c.prev)+'/'+c.p], ['Next subnet', c.next===null?'—':ipStr(c.next)+'/'+c.p],
+    ['IP as integer', fmt(c.ip).replace(/,/g,'')], ['IP in hex', hex(c.ip)],
+    ['IP in binary', binDots(c.ip)], ['Mask in binary', binDots(c.mask)],
+  ];
+}
+function renderCalc(){
+  const c=calc(state.ip,state.p);
+  $('#calc-prefix').value=c.p;
+  $('#calc-prefix-out').textContent=`/${c.p} · ${ipStr(c.mask)}`;
+  renderBits($('#calc-bits'), c.ip, c.p);
+  $('#calc-hero').innerHTML = [
+    ['Network', ipStr(c.net)+'/'+c.p], ['Usable range', c.p>=31? `${ipStr(c.first)} – ${ipStr(c.last)}` : `.${c.first&255} – .${c.last&255}`.replace(/^/, '')],
+    ['Usable hosts', fmt(c.usable)], ['Broadcast', ipStr(c.bc)]
+  ].map(([k,v])=>`<div class="num"><span class="label">${k}</span><b>${esc(v)}</b></div>`).join('');
+  // usable range: show full when octets other than last differ
+  const sameUpper = (c.first>>>8)===(c.last>>>8);
+  if(!sameUpper || c.p>=31) $$('#calc-hero .num b')[1].textContent = `${ipStr(c.first)} – ${ipStr(c.last)}`;
+  else $$('#calc-hero .num b')[1].textContent = `${ipStr(c.first)} – .${c.last&255}`;
+  $('#calc-kv').innerHTML = calcKV().map(([k,v])=>`<div><dt>${k}</dt><dd class="copyable" title="Click to copy">${esc(v)}</dd></div>`).join('');
+  renderCheck();
+}
+function renderCheck(){
+  const v=$('#calc-check').value.trim(), out=$('#calc-check-out');
+  if(!v){ out.innerHTML=''; return; }
+  const n=parseIP(v); if(n===null){ out.innerHTML='<span class="chip bad">Not a valid address</span>'; return; }
+  const c=calc(state.ip,state.p);
+  if(n<c.net||n>c.bc) out.innerHTML=`<span class="chip bad">Outside ${ipStr(c.net)}/${c.p}</span>`;
+  else if(c.p<31 && n===c.net) out.innerHTML='<span class="chip">Inside · this is the network address</span>';
+  else if(c.p<31 && n===c.bc) out.innerHTML='<span class="chip">Inside · this is the broadcast address</span>';
+  else out.innerHTML=`<span class="chip ok">Inside · usable host #${fmt(n-c.first+1)}</span>`;
+}
+$('#calc-in').addEventListener('input',e=>{
+  const r=parseCIDR(e.target.value);
+  if(r.error){ e.target.classList.add('invalid'); $('#calc-err').textContent=r.error; $('#calc-err').hidden=false; return; }
+  setCalc(r.ip,r.p,{from:'calc-in'});
+});
+$('#calc-in').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const r=parseCIDR(e.target.value); if(!r.error) e.target.value=ipStr(r.ip)+'/'+r.p; }});
+$('#calc-prefix').addEventListener('input',e=>setCalc(state.ip,+e.target.value));
+$('#calc-bits').addEventListener('click',e=>{ const b=e.target.closest('.bit'); if(!b) return; const i=+b.dataset.i; setCalc(state.ip, i+1===state.p ? i : i+1); });
+$('#calc-check').addEventListener('input',renderCheck);
+$('#calc-kv').addEventListener('click',e=>{ const d=e.target.closest('dd'); if(d) copyText(d.textContent,d); });
+$('#calc-save').onclick=()=>{ const c=calc(state.ip,state.p); const t=ipStr(state.ip)+'/'+state.p; openSave('calc', `${ipStr(c.net)}/${c.p} subnet`, {input:t}); };
+$('#calc-export').onclick=()=>{ const c=calc(state.ip,state.p); openExport({title:`Subnet ${ipStr(c.net)}/${c.p}`, kv:calcKV()}); };
+
+/* ================= BINARY ================= */
+function renderBinary(){
+  const c=calc(state.ip,state.p);
+  $('#bin-prefix').value=c.p; $('#bin-prefix-out').textContent='/'+c.p;
+  const rows=[
+    ['IP address','',c.ip,'ip'],['Subnet mask','AND',c.mask,'mask'],['Network','=',c.net,''],
+    ['Wildcard','OR',c.wild,''],['Broadcast','=',c.bc,'']
+  ];
+  $('#bin-rows').innerHTML = rows.map(([l,op,v,k])=>`<div class="brow"><div><div style="font-weight:600">${l}</div><div class="op">${op?op+' ↓':'&nbsp;'}</div></div><div class="bits ${k?'':'static'}" data-row="${k}"></div><div class="dec">${ipStr(v)}</div></div>`).join('');
+  $$('#bin-rows .bits').forEach((el,i)=>renderBits(el, rows[i][2], c.p, {static:!rows[i][3]}));
+}
+$('#bin-rows').addEventListener('click',e=>{
+  const b=e.target.closest('.bit'); if(!b) return; const row=b.closest('.bits').dataset.row; const i=+b.dataset.i;
+  if(row==='ip') setCalc((state.ip ^ (2**(31-i)))>>>0, state.p);
+  else if(row==='mask') setCalc(state.ip, i+1===state.p ? i : i+1);
+});
+$('#bin-in').addEventListener('input',e=>{ const r=parseCIDR(e.target.value); e.target.classList.toggle('invalid',!!r.error); if(!r.error) setCalc(r.ip,r.p,{from:'bin-in'}); });
+$('#bin-prefix').addEventListener('input',e=>setCalc(state.ip,+e.target.value));
+$('#bin-export').onclick=()=>{ const c=calc(state.ip,state.p); openExport({title:`Binary view ${ipStr(c.ip)}/${c.p}`, table:{head:['Row','Binary','Decimal'], rows:[['IP address',binDots(c.ip),ipStr(c.ip)],['Subnet mask',binDots(c.mask),ipStr(c.mask)],['Network (IP AND mask)',binDots(c.net),ipStr(c.net)],['Wildcard',binDots(c.wild),ipStr(c.wild)],['Broadcast (network OR wildcard)',binDots(c.bc),ipStr(c.bc)]]}}); };
+
+// octet converter
+const PLACES=[128,64,32,16,8,4,2,1];
+$('#oct-place').innerHTML = PLACES.map(v=>`<button type="button" data-v="${v}" aria-pressed="false"><small>${v}</small><b>0</b></button>`).join('');
+function renderOctet(n){
+  $$('#oct-place button').forEach(b=>{ const on=(n & +b.dataset.v)!==0; b.setAttribute('aria-pressed',on); $('b',b).textContent=on?1:0; });
+  $('#oct-bin').textContent=n.toString(2).padStart(8,'0'); $('#oct-hex').textContent='0x'+n.toString(16).toUpperCase().padStart(2,'0');
+  const parts=PLACES.filter(v=>n&v); $('#oct-sum').textContent = parts.length ? parts.join(' + ')+' = '+n : 'All bits off = 0';
+}
+$('#oct-place').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const n=(+$('#oct-dec').value||0) ^ +b.dataset.v; $('#oct-dec').value=n; renderOctet(n); });
+$('#oct-dec').addEventListener('input',e=>{ let n=Math.round(+e.target.value); if(!(n>=0&&n<=255)) { e.target.classList.add('invalid'); return; } e.target.classList.remove('invalid'); renderOctet(n); });
+
+/* ================= MASKS ================= */
+let maskP = 22;
+function parseMaskAny(s){
+  s=s.trim().toLowerCase();
+  if(!s) return {error:'Enter a prefix, mask, wildcard or host count.'};
+  let m;
+  if((m=s.match(/^\/?(\d{1,2})$/))){ const p=+m[1]; return p<=32?{p,from:'Read as a CIDR prefix'}:{error:'A prefix must be between 0 and 32.'}; }
+  if((m=s.match(/^([\d,]+)\s*(hosts?|h)$/))){ const h=+m[1].replace(/,/g,''); const p=prefixForHosts(h); return p===null?{error:'That is more hosts than IPv4 can hold.'}:{p,from:`Smallest subnet with at least ${fmt(h)} usable hosts`}; }
+  const n=parseIP(s);
+  if(n===null) return {error:'Try /22, 255.255.252.0, 0.0.3.255 or 500 hosts.'};
+  const pm=maskToPrefix(n); if(pm!==null) return {p:pm,from:'Read as a subnet mask'};
+  const pw=maskToPrefix((~n)>>>0); if(pw!==null) return {p:pw,from:'Read as a wildcard mask'};
+  return {error:`${s} is not a valid mask. The 1 bits must be contiguous from the left.`};
+}
+function maskKV(p){
+  const m=maskOf(p), w=wildOf(p);
+  const per24 = p<=24 ? `${fmt(2**(24-p))} × /24` : `1/${2**(p-24)} of a /24`;
+  return [['CIDR prefix','/'+p],['Subnet mask',ipStr(m)],['Wildcard mask',ipStr(w)],['Mask in binary',binDots(m)],['Mask in hex',hex(m)],['Total addresses',fmt(2**(32-p))],['Usable hosts',fmt(usableOf(p))],['Network bits / host bits',`${p} / ${32-p}`],['Size in /24 blocks',per24]];
+}
+function renderMask(){
+  const r=parseMaskAny($('#mask-in').value);
+  $('#mask-in').classList.toggle('invalid',!!r.error); $('#mask-err').hidden=!r.error; $('#mask-err').textContent=r.error||'';
+  if(r.error) return;
+  maskP=r.p; $('#mask-detected').textContent=r.from+'.';
+  $('#mask-kv').innerHTML = maskKV(r.p).map(([k,v])=>`<div><dt>${k}</dt><dd class="copyable" title="Click to copy">${esc(v)}</dd></div>`).join('');
+  $$('#mask-table tbody tr').forEach(tr=>tr.classList.toggle('sel', +tr.dataset.p===r.p));
+}
+function maskTableRows(){ const rows=[]; for(let p=32;p>=0;p--) rows.push(['/'+p, ipStr(maskOf(p)), ipStr(wildOf(p)), fmt(2**(32-p)), fmt(usableOf(p))]); return rows; }
+$('#mask-table').innerHTML = '<thead><tr><th>Prefix</th><th>Subnet mask</th><th>Wildcard</th><th class="r">Addresses</th><th class="r">Usable hosts</th></tr></thead><tbody>' +
+  maskTableRows().map(r=>`<tr class="click" data-p="${r[0].slice(1)}"><td class="mono">${r[0]}</td><td class="mono">${r[1]}</td><td class="mono">${r[2]}</td><td class="mono r">${r[3]}</td><td class="mono r">${r[4]}</td></tr>`).join('') + '</tbody>';
+$('#mask-table').addEventListener('click',e=>{ const tr=e.target.closest('tr[data-p]'); if(!tr) return; $('#mask-in').value=ipStr(maskOf(+tr.dataset.p)); renderMask(); window.scrollTo({top:0,behavior:'smooth'}); });
+$('#mask-in').addEventListener('input',renderMask);
+$('#mask-kv').addEventListener('click',e=>{ const d=e.target.closest('dd'); if(d) copyText(d.textContent,d); });
+$('#mask-export').onclick=()=>openExport({title:'IPv4 prefix reference', table:{head:['Prefix','Subnet mask','Wildcard','Addresses','Usable hosts'], rows:maskTableRows()}});
+
+/* ================= EQUAL ================= */
+let eqMode='subnets', eqResult=null;
+function computeEqual(){
+  const r=parseCIDR($('#eq-net').value); const val=Math.floor(+$('#eq-val').value);
+  if(r.error) return {error:r.error};
+  if(!(val>=1)) return {error:'Enter a whole number of 1 or more.'};
+  const base=calc(r.ip,r.p); let np;
+  if(eqMode==='subnets'){ np = r.p + Math.ceil(Math.log2(val)); if(np>32) return {error:`A /${r.p} can't be split into ${fmt(val)} subnets. The most is ${fmt(2**(32-r.p))} single addresses.`}; }
+  else { np = prefixForHosts(val); if(np===null) return {error:'That is more hosts than IPv4 can hold.'}; if(np<r.p) return {error:`${fmt(val)} hosts needs a /${np}, which is bigger than the /${r.p} you are dividing.`}; }
+  const count=2**(np-r.p), size=2**(32-np);
+  return {base, p:r.p, np, count, size, val, normalized: base.net!==r.ip, implied:r.implied};
+}
+function equalRows(res, limit=Infinity){
+  const rows=[]; const n=Math.min(res.count,limit);
+  for(let i=0;i<n;i++){ const c=calc(res.base.net + i*res.size, res.np); rows.push([String(i+1), ipStr(c.net)+'/'+c.p, ipStr(c.first), ipStr(c.last), ipStr(c.bc), fmt(c.usable)]); }
+  return rows;
+}
+function renderEqual(showAll){
+  const res=computeEqual(); eqResult=res;
+  $('#eq-err').hidden=!res.error; $('#eq-err').textContent=res.error||''; $('#eq-out-panel').hidden=!!res.error;
+  if(res.error){ $('#eq-note').textContent=''; return; }
+  const notes=[];
+  if(res.normalized) notes.push(`Host bits were set, so the network ${ipStr(res.base.net)}/${res.p} is used.`);
+  if(res.implied) notes.push(`No prefix given, so the classful default /${res.p} is used.`);
+  if(eqMode==='subnets' && res.count>res.val) notes.push(`${fmt(res.val)} subnets need ${res.np-res.p} borrowed bit${res.np-res.p===1?'':'s'}, which gives ${fmt(res.count)}. The extra ${fmt(res.count-res.val)} are spare.`);
+  if(res.np>30) notes.push(`/${res.np} subnets have no room for a separate network and broadcast address.`);
+  $('#eq-note').textContent=notes.join(' ');
+  $('#eq-hero').innerHTML=[['New prefix','/'+res.np+' · '+ipStr(maskOf(res.np))],['Borrowed bits',String(res.np-res.p)],['Subnets',fmt(res.count)],['Usable hosts each',fmt(usableOf(res.np))]].map(([k,v])=>`<div class="num"><span class="label">${k}</span><b>${v}</b></div>`).join('');
+  renderBits($('#eq-bits'), res.base.net, res.np, {base:res.p, static:true});
+  const LIMIT = showAll ? 4096 : 256;
+  const rows=equalRows(res, LIMIT);
+  $('#eq-table').innerHTML='<thead><tr><th class="r">#</th><th>Subnet</th><th>First host</th><th>Last host</th><th>Broadcast</th><th class="r">Usable</th></tr></thead><tbody>'+rows.map(r=>`<tr class="click" data-net="${r[1]}"><td class="mono r">${r[0]}</td><td class="mono">${r[1]}</td><td class="mono">${r[2]}</td><td class="mono">${r[3]}</td><td class="mono">${r[4]}</td><td class="mono r">${r[5]}</td></tr>`).join('')+'</tbody>';
+  $('#eq-more').innerHTML = res.count>rows.length ? `Showing ${fmt(rows.length)} of ${fmt(res.count)} subnets. ${!showAll && res.count>256?'<button class="btn sm" id="eq-showall">Show up to 4,096</button>':''}` : 'Click a subnet to open it in the calculator.';
+  const sa=$('#eq-showall'); if(sa) sa.onclick=()=>renderEqual(true);
+  logHistory('equal', `${ipStr(res.base.net)}/${res.p} ÷ ${eqMode==='subnets'?res.val+' subnets':res.val+' hosts'}`, eqData());
+}
+function eqData(){ return {net:$('#eq-net').value.trim(), mode:eqMode, value:+$('#eq-val').value}; }
+function setEqMode(m){ eqMode=m; $$('#eq-mode button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.mode===m)); $('#eq-val-label').textContent = m==='subnets'?'Subnets needed':'Hosts per subnet'; }
+$('#eq-mode').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; setEqMode(b.dataset.mode); $('#eq-val').value = eqMode==='subnets'?6:50; renderEqual(); });
+$('#eq-net').addEventListener('input',()=>renderEqual()); $('#eq-val').addEventListener('input',()=>renderEqual());
+$('#eq-table').addEventListener('click',e=>{ const tr=e.target.closest('tr[data-net]'); if(!tr) return; const r=parseCIDR(tr.dataset.net); setCalc(r.ip,r.p); go('calc'); });
+$('#eq-save').onclick=()=>{ const res=eqResult; if(!res||res.error) return toast('Fix the input first'); openSave('equal', `${ipStr(res.base.net)}/${res.p} into ${fmt(res.count)} × /${res.np}`, eqData()); };
+$('#eq-export').onclick=()=>{ const res=eqResult; if(!res||res.error) return toast('Fix the input first');
+  openExport({title:`${ipStr(res.base.net)}-${res.p} split into ${res.count} x ${res.np}`.replace(/-(\d+) split/,'/$1 split').replace(/ x (\d+)$/,' × /$1'),
+    sections:[{heading:'Summary',kv:[['Network',ipStr(res.base.net)+'/'+res.p],['New prefix','/'+res.np+' ('+ipStr(maskOf(res.np))+')'],['Borrowed bits',String(res.np-res.p)],['Subnets',fmt(res.count)],['Usable hosts each',fmt(usableOf(res.np))]]},
+      {heading:'Subnets',table:{head:['#','Subnet','First host','Last host','Broadcast','Usable'],rows:equalRows(res,65536)}}]}); };
+
+/* ================= VLSM ================= */
+let vRows = [
+  {name:'Engineering',hosts:250},{name:'Sales',hosts:120},{name:'Guest Wi-Fi',hosts:60},
+  {name:'Servers',hosts:28},{name:'Printers',hosts:12},{name:'WAN link A',hosts:2},{name:'WAN link B',hosts:2}
+];
+let vResult=null;
+const VCOLORS=['--net','--sub','--host','--ok','--bad'];
+function renderVRows(){
+  $('#v-rows').innerHTML = vRows.map((r,i)=>`<div class="vrow"><input type="text" data-i="${i}" data-k="name" id="v-name-${i}" value="${esc(r.name)}" aria-label="Subnet name"><input type="number" class="mono" min="1" data-i="${i}" data-k="hosts" id="v-hosts-${i}" value="${r.hosts}" aria-label="Hosts needed"><button class="btn ghost sm" data-del="${i}" aria-label="Remove ${esc(r.name)}">Remove</button></div>`).join('') || '<div class="empty">No subnets yet. Add one to start planning.</div>';
+}
+function computeVLSM(){
+  const r=parseCIDR($('#v-base').value); if(r.error) return {error:r.error};
+  const base=calc(r.ip,r.p);
+  const reqs=vRows.map((x,i)=>({...x,i,hosts:Math.floor(+x.hosts)})).filter(x=>x.hosts>=1);
+  const bad=reqs.find(x=>prefixForHosts(x.hosts)===null); if(bad) return {error:`${bad.name} needs more hosts than IPv4 can hold.`};
+  const sorted=[...reqs].sort((a,b)=>b.hosts-a.hosts || a.i-b.i);
+  let cur=base.net; const alloc=[]; let overflow=null;
+  for(const x of sorted){
+    const p=prefixForHosts(x.hosts), size=2**(32-p);
+    if(p<r.p || cur+size-1>base.bc){ overflow=overflow||x; alloc.push({...x,p,fail:true}); continue; }
+    const c=calc(cur,p); alloc.push({...x,p,c}); cur+=size;
+  }
+  const used=cur-base.net;
+  const needed=sorted.reduce((s,x)=>s+2**(32-prefixForHosts(x.hosts)),0);
+  return {base,p:r.p,alloc,used,overflow,needed,free: cur<=base.bc ? rangeToCidrs(cur,base.bc) : [], normalized:base.net!==r.ip};
+}
+function vlsmTable(res){
+  return res.alloc.map(a=> a.fail ? [a.name, fmt(a.hosts), '/'+a.p, 'Does not fit','','','',''] :
+    [a.name, fmt(a.hosts), fmt(a.c.usable), ipStr(a.c.net)+'/'+a.p, ipStr(a.c.mask), `${ipStr(a.c.first)} – ${ipStr(a.c.last)}`, ipStr(a.c.bc), fmt(a.c.usable-a.hosts)]);
+}
+function renderVLSM(){
+  const res=computeVLSM(); vResult=res;
+  $('#v-base').classList.toggle('invalid',!!res.error);
+  if(res.error){ $('#v-err').hidden=false; $('#v-err').textContent=res.error; return; }
+  const total=res.base.size, pct=(res.used/total*100);
+  $('#v-hero').innerHTML=[['Block',ipStr(res.base.net)+'/'+res.p],['Space used',`${fmt(res.used)} of ${fmt(total)} (${pct.toFixed(pct<10?1:0)}%)`]].map(([k,v])=>`<div class="num"><span class="label">${k}</span><b>${v}</b></div>`).join('');
+  const placed=res.alloc.filter(a=>!a.fail);
+  $('#v-map').innerHTML = placed.map((a,i)=>`<span style="width:${a.c.size/total*100}%;background:var(${VCOLORS[i%VCOLORS.length]})" title="${esc(a.name)} · ${ipStr(a.c.net)}/${a.p}"></span>`).join('');
+  $('#v-key').innerHTML = placed.map((a,i)=>`<span style="--c:var(${VCOLORS[i%VCOLORS.length]})">${esc(a.name)} /${a.p}</span>`).join('') + (res.free.length?'<span style="--c:var(--sunken);">Free</span>':'');
+  if(res.overflow){ $('#v-err').hidden=false; $('#v-err').textContent=`Not everything fits. The plan needs ${fmt(res.needed)} addresses but /${res.p} holds ${fmt(total)}. Try a /${Math.max(0,32-Math.ceil(Math.log2(res.needed)))} or larger.`; }
+  else { $('#v-err').hidden=true; }
+  if(res.normalized){ $('#v-err').hidden=false; $('#v-err').textContent=(res.overflow?$('#v-err').textContent+' ':'')+`Host bits were set, so ${ipStr(res.base.net)}/${res.p} is used.`; }
+  $('#v-free').innerHTML = res.free.length ? `<span class="label">Free blocks left</span><div class="chips" style="margin-top:6px">${res.free.slice(0,12).map(f=>`<span class="chip">${ipStr(f.net)}/${f.p}</span>`).join('')}${res.free.length>12?`<span class="chip">+${res.free.length-12} more</span>`:''}</div>` : (res.overflow?'':'<span class="chip ok">The block is fully used</span>');
+  const head=['Name','Hosts needed','Usable','Subnet','Mask','Host range','Broadcast','Spare'];
+  $('#v-table').innerHTML='<thead><tr>'+head.map((h,i)=>`<th class="${[1,2,7].includes(i)?'r':''}">${h}</th>`).join('')+'</tr></thead><tbody>'+
+    vlsmTable(res).map((r,ri)=>{ const a=res.alloc[ri]; return a.fail ? `<tr><td>${esc(r[0])}</td><td class="mono r">${r[1]}</td><td class="mono r">${r[2]}</td><td colspan="5"><span class="chip bad">Does not fit</span></td></tr>` :
+      `<tr class="click" data-net="${r[3]}"><td>${esc(r[0])}</td><td class="mono r">${r[1]}</td><td class="mono r">${r[2]}</td><td class="mono">${r[3]}</td><td class="mono">${r[4]}</td><td class="mono">${r[5]}</td><td class="mono">${r[6]}</td><td class="mono r">${r[7]}</td></tr>`; }).join('')+'</tbody>';
+  logHistory('vlsm', `VLSM ${ipStr(res.base.net)}/${res.p} · ${vRows.length} subnets`, vData());
+}
+function vData(){ return {base:$('#v-base').value.trim(), rows:vRows.map(r=>({name:r.name,hosts:+r.hosts}))}; }
+$('#v-rows').addEventListener('input',e=>{ const t=e.target; if(t.dataset.i===undefined) return; vRows[+t.dataset.i][t.dataset.k] = t.dataset.k==='hosts' ? +t.value : t.value; renderVLSM(); });
+$('#v-rows').addEventListener('click',e=>{ const b=e.target.closest('[data-del]'); if(!b) return; vRows.splice(+b.dataset.del,1); renderVRows(); renderVLSM(); });
+$('#v-add').onclick=()=>{ vRows.push({name:'Subnet '+(vRows.length+1),hosts:10}); renderVRows(); renderVLSM(); $(`#v-name-${vRows.length-1}`).select(); };
+$('#v-clear').onclick=()=>{ vRows=[]; renderVRows(); renderVLSM(); };
+$('#v-base').addEventListener('input',renderVLSM);
+$('#v-table').addEventListener('click',e=>{ const tr=e.target.closest('tr[data-net]'); if(!tr) return; const r=parseCIDR(tr.dataset.net); setCalc(r.ip,r.p); go('calc'); });
+$('#v-save').onclick=()=>{ const res=vResult; if(!res||res.error) return toast('Fix the address block first'); openSave('vlsm', `VLSM plan for ${ipStr(res.base.net)}/${res.p}`, vData()); };
+$('#v-export').onclick=()=>{ const res=vResult; if(!res||res.error) return toast('Fix the address block first');
+  openExport({title:`VLSM plan ${ipStr(res.base.net)}/${res.p}`, sections:[
+    {heading:'Summary',kv:[['Address block',ipStr(res.base.net)+'/'+res.p],['Addresses used',`${fmt(res.used)} of ${fmt(res.base.size)}`],['Free blocks',res.free.map(f=>ipStr(f.net)+'/'+f.p).join(', ')||'None']]},
+    {heading:'Allocations',table:{head:['Name','Hosts needed','Usable','Subnet','Mask','Host range','Broadcast','Spare'],rows:vlsmTable(res)}}]}); };
+
+/* ================= PRACTICE ================= */
+const QTYPES = {
+  network:{label:'Network address'}, broadcast:{label:'Broadcast address'}, first:{label:'First host'}, last:{label:'Last host'},
+  hosts:{label:'Usable hosts'}, mask:{label:'Prefix → mask'}, prefix:{label:'Mask → prefix'}, wildcard:{label:'Wildcard mask'},
+  need:{label:'Hosts → prefix'}, same:{label:'Same subnet?'}, count:{label:'Subnet count'}
+};
+const LEVELS = {easy:[24,30,'Prefixes /24 to /30. Only the last octet changes.'], medium:[16,30,'Prefixes /16 to /30. The third octet comes into play.'], hard:[8,30,'Prefixes /8 to /30, with any octet as the interesting one.']};
+let pr = Object.assign({mode:'sheet', level:'easy', types:Object.keys(QTYPES), correct:0, total:0, streak:0, best:0}, LS.get('sc.practice', {}));
+let q=null;
+const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function randIP(){
+  const k=rnd(0,4);
+  if(k===0) return parseIP(`10.${rnd(0,255)}.${rnd(0,255)}.${rnd(1,254)}`);
+  if(k===1) return parseIP(`172.${rnd(16,31)}.${rnd(0,255)}.${rnd(1,254)}`);
+  if(k<=3) return parseIP(`192.168.${rnd(0,255)}.${rnd(1,254)}`);
+  let o; do{ o=rnd(1,223); }while(o===10||o===127); return parseIP(`${o}.${rnd(0,255)}.${rnd(0,255)}.${rnd(1,254)}`);
+}
+const C = s => `<code>${s}</code>`;
+function makeQ(){
+  const types = pr.types.length ? pr.types : Object.keys(QTYPES);
+  const type = types[rnd(0,types.length-1)];
+  const [lo,hi]=LEVELS[pr.level]; const p=rnd(lo,hi); const ip=randIP(); const c=calc(ip,p);
+  const Q={type, kind:'ip'};
+  switch(type){
+    case 'network': Q.prompt=`What is the network address of ${C(ipStr(ip)+'/'+p)}?`; Q.ans=c.net; Q.why=explainBlock(ip,p); break;
+    case 'broadcast': Q.prompt=`What is the broadcast address of ${C(ipStr(ip)+'/'+p)}?`; Q.ans=c.bc; Q.why=explainBlock(ip,p); break;
+    case 'first': Q.prompt=`What is the first usable host in ${C(ipStr(ip)+'/'+p)}?`; Q.ans=c.first; Q.why=explainBlock(ip,p)+' The first host is the network address + 1.'; break;
+    case 'last': Q.prompt=`What is the last usable host in ${C(ipStr(ip)+'/'+p)}?`; Q.ans=c.last; Q.why=explainBlock(ip,p)+' The last host is the broadcast address − 1.'; break;
+    case 'hosts': Q.kind='num'; Q.prompt=`How many usable hosts are in a ${C('/'+p)} subnet?`; Q.ans=c.usable; Q.why=`A /${p} leaves ${32-p} host bits. 2^${32-p} = ${fmt(c.size)} addresses, minus the network and broadcast = ${fmt(c.usable)}.`; break;
+    case 'mask': Q.prompt=`What is the subnet mask for ${C('/'+p)}?`; Q.ans=c.mask; Q.why=`${p} one-bits: ${binDots(c.mask)} = ${ipStr(c.mask)}.`; break;
+    case 'prefix': Q.kind='prefix'; Q.prompt=`What prefix length matches the mask ${C(ipStr(c.mask))}?`; Q.ans=p; Q.why=`${ipStr(c.mask)} = ${binDots(c.mask)}, which has ${p} one-bits, so /${p}.`; break;
+    case 'wildcard': Q.prompt=`What is the wildcard mask for ${C('/'+p)} (${ipStr(c.mask)})?`; Q.ans=c.wild; Q.why=`Subtract each mask octet from 255: 255.255.255.255 − ${ipStr(c.mask)} = ${ipStr(c.wild)}.`; break;
+    case 'need': { const np=rnd(Math.max(lo,20),30), h=rnd(2**(32-np-1)-1, 2**(32-np)-2); Q.kind='prefix'; Q.prompt=`What is the smallest subnet (prefix) that holds ${C(fmt(h)+' hosts')}?`; Q.ans=prefixForHosts(h); Q.why=`You need 2^n − 2 ≥ ${fmt(h)}. n = ${32-Q.ans} gives ${fmt(usableOf(Q.ans))} hosts (n = ${31-Q.ans} gives only ${fmt(Math.max(0,2**(31-Q.ans)-2))}). So 32 − ${32-Q.ans} = /${Q.ans}.`; break; }
+    case 'same': {
+      Q.kind='yn'; const same=Math.random()<.5; let other;
+      if(same){ other = c.first + rnd(0, Math.max(0,c.last-c.first)); }
+      else { const blk=c.size; other = (c.net + blk*(Math.random()<.5&&c.net>=blk?-1:1) + rnd(1,Math.max(1,blk-2)))>>>0; if(other>MAX) other=c.net-blk+1; }
+      if(other===ip) other = c.last;
+      Q.ans = ((other & c.mask)>>>0)===c.net ? 'yes':'no';
+      Q.prompt=`With mask ${C('/'+p)}, are ${C(ipStr(ip))} and ${C(ipStr(other))} in the same subnet?`;
+      Q.why=`${ipStr(ip)} is in ${ipStr(c.net)}/${p}. ${ipStr(other)} is in ${ipStr((other & c.mask)>>>0)}/${p}. ${explainBlock(ip,p)}`; break; }
+    case 'count': { const a=rnd(Math.max(lo,8),Math.min(28,hi-2)), b=rnd(a+1,Math.min(30,a+8)); Q.kind='num'; Q.prompt=`How many ${C('/'+b)} subnets fit in a ${C('/'+a)}?`; Q.ans=2**(b-a); Q.why=`${b} − ${a} = ${b-a} borrowed bits. 2^${b-a} = ${fmt(2**(b-a))}.`; break; }
+  }
+  return Q;
+}
+function fmtAns(Q){ return Q.kind==='ip'?ipStr(Q.ans):Q.kind==='prefix'?'/'+Q.ans:Q.kind==='yn'?(Q.ans==='yes'?'Yes':'No'):fmt(Q.ans); }
+function checkAns(Q,v){
+  v=String(v).trim();
+  if(Q.kind==='ip'){ const n=parseIP(v); return n===null?null:n===Q.ans; }
+  if(Q.kind==='prefix'){ const m=v.match(/^\/?(\d{1,2})$/); if(m) return +m[1]===Q.ans; const n=parseIP(v); if(n!==null&&maskToPrefix(n)!==null) return maskToPrefix(n)===Q.ans; return null; }
+  if(Q.kind==='num'){ const s=v.replace(/[,\s_]/g,''); if(!/^\d+$/.test(s)) return null; return +s===Q.ans; }
+  return v===Q.ans;
+}
+function savePr(){ LS.set('sc.practice',pr); }
+function renderScore(){
+  const acc = pr.total ? Math.round(pr.correct/pr.total*100)+'%' : '—';
+  $('#pr-score').innerHTML=[['Score',`${pr.correct} / ${pr.total}`],['Accuracy',acc],['Streak',String(pr.streak)],['Best streak',String(pr.best)]].map(([k,v])=>`<div class="num"><span class="label">${k}</span><b>${v}</b></div>`).join('');
+}
+function renderPracticeSettings(){
+  $$('.lvl-seg button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.level===pr.level));
+  $('#pr-level-note').textContent=LEVELS[pr.level][2];
+  $('#ws-level-note').textContent='Difficulty: '+LEVELS[pr.level][2];
+  $$('#pr-mode button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.mode===pr.mode));
+  $('#pr-sheet').hidden = pr.mode!=='sheet'; $('#pr-quiz').hidden = pr.mode!=='quiz';
+  $('#pr-types').innerHTML=Object.entries(QTYPES).map(([k,t])=>`<button type="button" data-t="${k}" aria-pressed="${pr.types.includes(k)}">${t.label}</button>`).join('');
+}
+function newQ(){
+  q=makeQ(); q.done=false;
+  $('#pr-type').textContent=QTYPES[q.type].label; $('#pr-level-label').textContent=pr.level;
+  $('#pr-prompt').innerHTML=q.prompt; $('#pr-feedback').innerHTML='';
+  $('#pr-answer-row').hidden = q.kind==='yn'; $('#pr-yesno').hidden = q.kind!=='yn';
+  $$('#pr-yesno button').forEach(b=>b.disabled=false);
+  const a=$('#pr-answer'); a.value=''; a.disabled=false; a.classList.remove('invalid');
+  a.placeholder = q.kind==='ip'?'e.g. 192.168.1.0':q.kind==='prefix'?'e.g. /26':'e.g. 62';
+  $('#pr-submit').disabled=false; $('#pr-next').hidden=true; $('#pr-skip').hidden=false;
+  if(q.kind!=='yn' && currentView==='practice' && pr.mode==='quiz') a.focus({preventScroll:true});
+}
+function submitAns(v){
+  if(!q || q.done) return;
+  const ok=checkAns(q,v);
+  if(ok===null){ $('#pr-answer').classList.add('invalid'); $('#pr-feedback').innerHTML=`<div class="feedback bad">That answer isn't in a format I can check. Try something like ${q.kind==='ip'?'10.0.0.0':q.kind==='prefix'?'/26':'62'}.</div>`; return; }
+  q.done=true; pr.total++; if(ok){ pr.correct++; pr.streak++; pr.best=Math.max(pr.best,pr.streak); } else pr.streak=0; savePr(); renderScore();
+  $('#pr-feedback').innerHTML=`<div class="feedback ${ok?'ok':'bad'}"><div style="margin-bottom:6px">${ok?'<strong>Correct.</strong>':`<strong>Not quite.</strong> The answer is <b>${fmtAns(q)}</b>.`}</div><div>${esc(q.why)}</div></div>`;
+  $('#pr-answer').disabled=true; $('#pr-submit').disabled=true; $$('#pr-yesno button').forEach(b=>b.disabled=true);
+  $('#pr-next').hidden=false; $('#pr-skip').hidden=true; $('#pr-next').focus({preventScroll:true});
+}
+$('#pr-form').addEventListener('submit',e=>{ e.preventDefault(); submitAns($('#pr-answer').value); });
+$('#pr-yesno').addEventListener('click',e=>{ const b=e.target.closest('[data-yn]'); if(b) submitAns(b.dataset.yn); });
+$('#pr-next').onclick=newQ; $('#pr-skip').onclick=newQ;
+$('.lvl-seg').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; pr.level=b.dataset.level; savePr(); renderPracticeSettings(); newQ(); wsNew(); });
+$('#pr-mode').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; pr.mode=b.dataset.mode; savePr(); renderPracticeSettings(); if(pr.mode==='sheet') wsFocusFirst(); else if(q && !q.done && q.kind!=='yn') $('#pr-answer').focus({preventScroll:true}); });
+
+/* ---------- Subnet worksheet ---------- */
+const WS_ROWS=[['net','Network'],['first','First host'],['last','Last host'],['bc','Broadcast'],['next','Next subnet']];
+let ws = Object.assign({solved:0,attempted:0,streak:0,best:0,times:[],autofill:false,autocheck:false}, LS.get('sc.sheet',{}));
+let wsP=null, wsTick=null;
+const saveWs=()=>LS.set('sc.sheet',ws);
+const octs = n => [n>>>24,(n>>>16)&255,(n>>>8)&255,n&255];
+const mmss = ms => { const s=Math.floor(ms/1000); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
+const wsInputs = () => $$('#ws-body input');
+const rowInputs = r => $$(`#ws-body tr[data-r="${r}"] input`);
+function renderWsScore(){
+  const avg = ws.times.length ? mmss(ws.times.reduce((a,b)=>a+b,0)/ws.times.length) : '—';
+  const best = ws.times.length ? mmss(Math.min(...ws.times)) : '—';
+  $('#ws-score').innerHTML=[['Solved',`${ws.solved} / ${ws.attempted}`],['Clean streak',`${ws.streak} (best ${ws.best})`],['Average time',avg],['Fastest',best]].map(([k,v])=>`<div class="num"><span class="label">${k}</span><b>${v}</b></div>`).join('');
+}
+function wsInteresting(p){ return p===0 ? 0 : Math.floor((p-1)/8); }
+function wsTouched(){ return wsInputs().some(i=>i.value && !i.classList.contains('auto')); }
+function wsNew(){
+  if(wsP && !wsP.done && wsTouched()){ ws.attempted++; ws.streak=0; saveWs(); }
+  const [lo,hi]=LEVELS[pr.level]; let ip,p,c;
+  do{ p=rnd(lo,hi); ip=randIP(); c=calc(ip,p); }while(c.next===null);
+  wsP={ip,p,c,ans:{net:c.net,first:c.first,last:c.last,bc:c.bc,next:c.next},usedShow:false,done:false,start:Date.now(),stage:0};
+  $('#ws-target').textContent = ipStr(ip)+' /'+p;
+  $('#ws-body').innerHTML = WS_ROWS.map(([r,l])=>`<tr data-r="${r}"><th scope="row">${l}</th><td><div class="oct4">${[0,1,2,3].map(o=>`<input type="text" inputmode="numeric" maxlength="3" id="ws-${r}-${o}" data-o="${o}" aria-label="${l} octet ${o+1}" autocomplete="off">`).join('<span>.</span>')}</div></td><td class="ws-ok"><span class="muted">—</span></td><td class="ws-ans"></td><td><button class="btn ghost sm" data-show="${r}">Show</button></td></tr>`).join('');
+  $('#ws-explain').innerHTML='';
+  if(ws.autofill) wsAutofill(true);
+  clearInterval(wsTick); $('#ws-timer').textContent='0:00';
+  wsTick=setInterval(()=>{ if(wsP && !wsP.done) $('#ws-timer').textContent=mmss(Date.now()-wsP.start); },1000);
+  renderWsScore();
+  if(currentView==='practice' && pr.mode==='sheet') wsFocusFirst();
+}
+function wsFocusFirst(){ const i=wsInputs().find(x=>!x.value); if(i) i.focus({preventScroll:true}); }
+function wsAutofill(on){
+  const k=wsInteresting(wsP.p);
+  WS_ROWS.forEach(([r])=>{ const want=octs(wsP.ans[r]); rowInputs(r).forEach((inp,o)=>{
+    if(o===k) return;
+    if(on && !inp.value){ inp.value=want[o]; inp.classList.add('auto'); }
+    if(!on && inp.classList.contains('auto')){ inp.value=''; inp.classList.remove('auto','good','wrong'); }
+  }); });
+}
+function wsCheckRow(r){
+  const want=octs(wsP.ans[r]); let all=true;
+  rowInputs(r).forEach((inp,o)=>{ const v=inp.value.trim(); const ok = v!=='' && /^\d+$/.test(v) && +v===want[o]; inp.classList.toggle('good',ok); inp.classList.toggle('wrong',!ok); if(!ok) all=false; });
+  $(`#ws-body tr[data-r="${r}"] .ws-ok`).innerHTML = all ? '<span class="chip ok">Correct</span>' : '<span class="chip bad">Wrong</span>';
+  return all;
+}
+function wsShowRow(r){ $(`#ws-body tr[data-r="${r}"] .ws-ans`).textContent = ipStr(wsP.ans[r]); if(!wsP.done) wsP.usedShow=true; }
+function wsExplain(){
+  const c=wsP.c, blk = c.size;
+  $('#ws-explain').innerHTML = `<div class="feedback ok" style="background:var(--sunken)">${esc(explainBlock(wsP.ip,wsP.p))} First host = network + 1, last host = broadcast − 1, and the next subnet = network + ${fmt(blk)} addresses${blk>=256?'':` (the next multiple of ${blk} in octet ${wsInteresting(wsP.p)+1})`}.</div>`;
+}
+function wsFinish(){
+  if(wsP.done) return; wsP.done=true; const t=Date.now()-wsP.start; clearInterval(wsTick); $('#ws-timer').textContent=mmss(t);
+  ws.attempted++;
+  if(!wsP.usedShow){ ws.solved++; ws.streak++; ws.best=Math.max(ws.best,ws.streak); ws.times=[...ws.times,t].slice(-20); }
+  else ws.streak=0;
+  saveWs(); renderWsScore();
+  $('#ws-explain').innerHTML = `<div class="feedback ${wsP.usedShow?'bad':'ok'}">${wsP.usedShow?'All five rows match, but Show was used, so this one doesn\'t count as solved.':`<strong>All five correct in ${mmss(t)}.</strong> Press Enter for the next problem.`}</div>`;
+  $('#ws-next').focus({preventScroll:true});
+}
+function wsCheckAll(){ const ok=WS_ROWS.map(([r])=>wsCheckRow(r)).every(Boolean); wsP.stage=1; if(ok) wsFinish(); return ok; }
+function wsShowAll(){ WS_ROWS.forEach(([r])=>wsShowRow(r)); wsP.stage=2; if(!wsP.done){ wsExplain(); } }
+function wsEnter(){
+  if(wsP.done || wsP.stage>=2) return wsNew();
+  if(wsP.stage===0) return wsCheckAll();
+  wsShowAll();
+}
+$('#ws-body').addEventListener('keydown',e=>{
+  const inp=e.target; if(inp.tagName!=='INPUT') return;
+  const list=wsInputs(), i=list.indexOf(inp);
+  if(e.key==='.'||e.key==='/'||e.key===' '){ e.preventDefault(); if(inp.value!=='' || e.key!==' ') { const n=list[i+1]; if(n){ n.focus(); n.select(); } } }
+  else if(e.key==='Backspace' && inp.value==='' && i>0){ e.preventDefault(); const pv=list[i-1]; pv.focus(); pv.select(); }
+  else if(e.key==='Enter'){ e.preventDefault(); wsEnter(); }
+});
+$('#ws-body').addEventListener('input',e=>{
+  const inp=e.target; if(inp.tagName!=='INPUT') return;
+  inp.value=inp.value.replace(/\D/g,'').slice(0,3); inp.classList.remove('auto','good','wrong');
+  const tr=inp.closest('tr'); tr.querySelector('.ws-ok').innerHTML='<span class="muted">—</span>';
+  if(inp.value.length===3){ const list=wsInputs(); const n=list[list.indexOf(inp)+1]; if(n){ n.focus(); n.select(); } }
+  if(ws.autocheck && !wsP.done){
+    const r=tr.dataset.r; if(rowInputs(r).every(x=>x.value!=='')) wsCheckRow(r);
+    if(WS_ROWS.every(([rr])=>rowInputs(rr).every(x=>x.classList.contains('good')||(x.value!==''&&+x.value===octs(wsP.ans[rr])[+x.dataset.o])))){ WS_ROWS.forEach(([rr])=>wsCheckRow(rr)); wsFinish(); }
+  }
+});
+$('#ws-body').addEventListener('focusin',e=>{ if(e.target.tagName==='INPUT') e.target.select(); });
+$('#ws-body').addEventListener('click',e=>{ const b=e.target.closest('[data-show]'); if(b){ wsShowRow(b.dataset.show); } });
+$('#ws-checkall').onclick=()=>{ if(!wsP.done) wsCheckAll(); };
+$('#ws-showall').onclick=wsShowAll;
+$('#ws-next').onclick=wsNew;
+$('#ws-next').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); wsNew(); } });
+$('#ws-autofill').checked=ws.autofill; $('#ws-autocheck').checked=ws.autocheck;
+$('#ws-autofill').onchange=e=>{ ws.autofill=e.target.checked; saveWs(); wsAutofill(ws.autofill); wsFocusFirst(); };
+$('#ws-autocheck').onchange=e=>{ ws.autocheck=e.target.checked; saveWs(); };
+$('#ws-reset').onclick=()=>{ Object.assign(ws,{solved:0,attempted:0,streak:0,best:0,times:[]}); saveWs(); renderWsScore(); toast('Worksheet stats reset'); };
+$('#pr-types').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; const t=b.dataset.t; pr.types = pr.types.includes(t) ? pr.types.filter(x=>x!==t) : [...pr.types,t]; if(!pr.types.length) pr.types=[t]; savePr(); renderPracticeSettings(); if(!pr.types.includes(q.type)) newQ(); });
+$('#pr-reset').onclick=()=>{ Object.assign(pr,{correct:0,total:0,streak:0,best:0}); savePr(); renderScore(); toast('Score reset'); };
+
+/* ================= SAVED & HISTORY ================= */
+const KIND_LABEL={calc:'Subnet',equal:'Equal split',vlsm:'VLSM'};
+function summary(it){
+  if(it.kind==='calc') return it.data.input;
+  if(it.kind==='equal') return `${it.data.net} ÷ ${it.data.value} ${it.data.mode}`;
+  if(it.kind==='vlsm') return `${it.data.base} · ${(it.data.rows||[]).length} subnets`;
+  return '';
+}
+function loadItem(it){
+  const d=it.data||{};
+  if(it.kind==='calc'){ const r=parseCIDR(d.input); if(!r.error){ setCalc(r.ip,r.p); } go('calc'); }
+  else if(it.kind==='equal'){ $('#eq-net').value=d.net; setEqMode(d.mode==='hosts'?'hosts':'subnets'); $('#eq-val').value=d.value; renderEqual(); go('equal'); }
+  else if(it.kind==='vlsm'){ $('#v-base').value=d.base; vRows=(d.rows||[]).map(r=>({name:String(r.name),hosts:+r.hosts})); renderVRows(); renderVLSM(); go('vlsm'); }
+}
+function renderSaved(){
+  $('#saved-count').textContent=Saved.items.length;
+  $('#saved-where').textContent = Saved.col ? 'Saved to your account, visible only to you.' : 'Saved in this browser.';
+  $('#saved-list').innerHTML = Saved.items.length ? Saved.items.map(it=>`<div class="item" data-id="${esc(it.id)}"><div class="t"><span class="chip ${it.kind==='vlsm'?'sub':'net'}" style="margin-bottom:4px">${KIND_LABEL[it.kind]||it.kind}</span><b>${esc(it.name)}</b><span class="small muted">${esc(summary(it))} · ${timeAgo(it.at)}</span></div><div class="acts"><button class="btn sm" data-act="open">Open</button><button class="btn ghost sm" data-act="rename">Rename</button><button class="btn ghost sm danger" data-act="del">Delete</button></div></div>`).join('')
+    : '<div class="empty">Nothing saved yet. Use Save on the Calculator, Equal subnets or VLSM planner.</div>';
+}
+function renderHistory(){
+  $('#hist-list').innerHTML = history.length ? history.map(h=>`<div class="item" data-id="${h.id}"><div class="t"><b>${esc(h.label)}</b><span class="small muted">${KIND_LABEL[h.kind]} · ${timeAgo(h.at)}</span></div><div class="acts"><button class="btn sm" data-act="open">Open</button><button class="btn ghost sm" data-act="save">Save</button></div></div>`).join('')
+    : '<div class="empty">Calculations you run appear here.</div>';
+}
+function renderRecent(){
+  const items=history.filter(h=>h.kind==='calc').slice(0,6);
+  $('#calc-recent').innerHTML = items.length ? items.map(h=>`<div class="item" data-id="${h.id}"><div class="t"><b>${esc(h.label)}</b><span class="small muted">${timeAgo(h.at)}</span></div><div class="acts"><button class="btn ghost sm" data-act="open">Open</button></div></div>`).join('')
+    : '<div class="empty">Try 10.0.0.0/8, 172.16.5.4 255.255.240.0 or 203.0.113.9/29.</div>';
+}
+$('#saved-list').addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]'); if(!b) return; const row=b.closest('.item'); const it=Saved.items.find(x=>x.id===row.dataset.id); if(!it) return;
+  if(b.dataset.act==='open') loadItem(it);
+  if(b.dataset.act==='del'){
+    if(b.dataset.confirm){ Saved.remove(it); } else { b.dataset.confirm='1'; b.textContent='Confirm delete'; setTimeout(()=>{ if(b.isConnected){ delete b.dataset.confirm; b.textContent='Delete'; } },3000); }
+  }
+  if(b.dataset.act==='rename'){
+    openModal('Rename', `<form id="rn-form" style="display:grid;gap:12px"><div class="field"><label class="label" for="rn-name">Name</label><input type="text" id="rn-name" value="${esc(it.name)}" maxlength="80"></div><div class="row" style="justify-content:flex-end"><button class="btn primary" type="submit">Rename</button></div></form>`);
+    $('#rn-name').select(); $('#rn-form').onsubmit=ev=>{ ev.preventDefault(); const n=$('#rn-name').value.trim(); if(n) Saved.rename(it,n); closeModal(); };
+  }
+});
+function histClick(e){
+  const b=e.target.closest('[data-act]'); if(!b) return; const h=history.find(x=>x.id===b.closest('.item').dataset.id); if(!h) return;
+  if(b.dataset.act==='open') loadItem(h);
+  if(b.dataset.act==='save') openSave(h.kind, h.label, h.data);
+}
+$('#hist-list').addEventListener('click',histClick); $('#calc-recent').addEventListener('click',histClick);
+$('#hist-clear').onclick=e=>{ const b=e.currentTarget; if(!b.dataset.confirm){ b.dataset.confirm='1'; b.textContent='Confirm clear'; setTimeout(()=>{ delete b.dataset.confirm; b.textContent='Clear'; },3000); return; } delete b.dataset.confirm; b.textContent='Clear'; history=[]; LS.set('sc.history',history); renderHistory(); renderRecent(); toast('History cleared'); };
+$('#saved-export').onclick=()=>{
+  if(!Saved.items.length) return toast('Nothing saved yet');
+  const sections=[{heading:'Saved calculations', table:{head:['Name','Type','Input','Saved'], rows:Saved.items.map(it=>[it.name, KIND_LABEL[it.kind]||it.kind, summary(it), new Date(it.at).toLocaleString()])}}];
+  Saved.items.forEach(it=>{
+    if(it.kind==='calc'){ const r=parseCIDR(it.data.input); if(r.error) return; const c=calc(r.ip,r.p); sections.push({heading:it.name, kv:[['Network',ipStr(c.net)+'/'+c.p],['Mask',ipStr(c.mask)],['Host range',ipStr(c.first)+' – '+ipStr(c.last)],['Broadcast',ipStr(c.bc)],['Usable hosts',fmt(c.usable)]]}); }
+  });
+  openExport({title:'Saved subnet calculations', sections});
+};
+
+/* ================= routing ================= */
+const VIEWS=['calc','binary','masks','equal','vlsm','practice','saved'];
+let currentView='calc';
+function go(v){ if(location.hash!=='#'+v) location.hash=v; else show(v); }
+function show(v){
+  if(!VIEWS.includes(v)) v='calc'; currentView=v;
+  $$('.view').forEach(s=>s.hidden = s.dataset.view!==v);
+  $$('.tab').forEach(t=>t.setAttribute('aria-selected', t.dataset.view===v));
+  if(v==='practice'){ if(pr.mode==='sheet') wsFocusFirst(); else if(q && !q.done && q.kind!=='yn') $('#pr-answer').focus({preventScroll:true}); }
+  if(v==='saved'){ renderHistory(); renderSaved(); }
+  try{ LS.set('sc.view',v); }catch(e){}
+}
+$$('.tab').forEach(t=>t.onclick=()=>go(t.dataset.view));
+document.addEventListener('click',e=>{ const g=e.target.closest('[data-goto]'); if(g) go(g.dataset.goto); });
+window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
+
+/* ================= boot ================= */
+(function boot(){
+  const r=parseCIDR($('#calc-in').value); state.ip=r.ip; state.p=r.p;
+  $('#bin-in').value=ipStr(state.ip)+'/'+state.p;
+  renderCalc(); renderBinary(); renderOctet(192); renderMask();
+  renderEqual(); renderVRows(); renderVLSM();
+  renderPracticeSettings(); renderScore(); newQ(); wsNew();
+  renderHistory(); renderRecent(); renderSaved();
+  show(location.hash.slice(1) || 'calc');
+  booting = false;
+  Saved.init();
+  if(window.claude && typeof window.claude.use==='function'){ window.claude.use('downloads').then(d=>{ downloads=d; }).catch(()=>{}); }
+})();
+</script>
+
+</body>
+</html>

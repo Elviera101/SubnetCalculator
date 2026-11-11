@@ -1275,12 +1275,12 @@ function renderVLSM(){
   $('#v-ticks').innerHTML=`<span>${ipStr(res.base.net)}</span><span>${ipStr(res.base.bc)}</span>`;
   $('#v-free').innerHTML = res.free.length ? `<span class="label">Free blocks you can still use</span><div class="chips" style="margin-top:6px">${res.free.slice(0,10).map(f=>`<span class="chip">${ipStr(f.net)}/${f.p}</span>`).join('')}${res.free.length>10?`<span class="chip">+${res.free.length-10} more</span>`:''}</div>` : '';
 
-  $('#v-table').innerHTML='<thead><tr><th>Subnet</th><th class="r">Hosts</th><th>Network</th><th>Host range</th><th>Broadcast</th><th>Mask</th><th>Usage</th></tr></thead><tbody>'+
+  $('#v-table').innerHTML='<thead><tr><th>Subnet</th><th class="r">Hosts</th><th>Network</th><th>Host range</th><th>Broadcast</th><th>Usage</th></tr></thead><tbody>'+
     (res.alloc.length ? res.alloc.map(a=>{ const sw=`<span class="sw" style="--c:${vColor(a.i)}"></span>`;
-      if(a.fail) return `<tr class="fail"><td>${sw}${esc(a.name)}</td><td class="mono r">${fmt(a.hosts)}</td><td class="mono">/${a.p}</td><td colspan="4">Does not fit in this block</td></tr>`;
+      if(a.fail) return `<tr class="fail"><td>${sw}${esc(a.name)}</td><td class="mono r">${fmt(a.hosts)}</td><td class="mono">/${a.p}</td><td colspan="3">Does not fit in this block</td></tr>`;
       const pct=Math.round(a.hosts/a.c.usable*100);
-      return `<tr class="click" data-net="${ipStr(a.c.net)}/${a.p}"><td>${sw}${esc(a.name)}</td><td class="mono r">${fmt(a.hosts)}</td><td class="mono">${ipStr(a.c.net)}/${a.p}</td><td class="mono">${ipStr(a.c.first)} – ${ipStr(a.c.last)}</td><td class="mono">${ipStr(a.c.bc)}</td><td class="mono">${ipStr(a.c.mask)}</td><td><span class="usage" style="--c:${vColor(a.i)}"><i style="width:${pct}%"></i></span><span class="mono small">${fmt(a.hosts)}/${fmt(a.c.usable)}</span></td></tr>`; }).join('')
-    : '<tr><td colspan="7" class="muted">Your plan appears here.</td></tr>')+'</tbody>';
+      return `<tr class="click" data-net="${ipStr(a.c.net)}/${a.p}"><td>${sw}${esc(a.name)}</td><td class="mono r">${fmt(a.hosts)}</td><td class="mono">${ipStr(a.c.net)}/${a.p}</td><td class="mono">${ipStr(a.c.first)} – ${ipStr(a.c.last)}</td><td class="mono">${ipStr(a.c.bc)}</td><td><span class="usage" style="--c:${vColor(a.i)}"><i style="width:${pct}%"></i></span><span class="mono small">${fmt(a.hosts)}/${fmt(a.c.usable)}</span></td></tr>`; }).join('')
+    : '<tr><td colspan="6" class="muted">Your plan appears here.</td></tr>')+'</tbody>';
   logHistory('vlsm', `VLSM ${ipStr(res.base.net)}/${res.p} · ${vRows.length} subnets`, vData());
 }
 function vData(){ return {base:$('#v-base').value.trim(), rows:vRows.map(r=>({name:r.name,hosts:+r.hosts}))}; }

@@ -18,6 +18,8 @@
   --sub:#0B8577; --sub-soft:#D0F0EA;
   --ok:#16794A; --ok-soft:#DCF2E5; --bad:#B4282E; --bad-soft:#FBE0E1;
   --shadow:0 1px 2px rgba(19,26,43,.06),0 4px 16px rgba(19,26,43,.05);
+  --side:#0E1A2E; --side-ink:#A3B1C8; --side-strong:#FFFFFF; --side-dim:#71819B; --side-active:#1C2C48;
+  --hero:#13213A; --hero-ink:#F3F6FB; --hero-muted:#A9B7CF; --hero-accent:#8FB0FF; --bg-glass:rgba(241,243,247,.88);
   --f-display:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
   --f-body:"Inter",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
@@ -29,6 +31,7 @@
   --sub:#38C4AE; --sub-soft:#0F3530;
   --ok:#4CC98A; --ok-soft:#123323; --bad:#F2777C; --bad-soft:#3B1719;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25); color-scheme:dark;
+  --side:#080D18; --side-active:#18243B; --hero:#1A2844; --bg-glass:rgba(13,18,32,.88);
 }}
 :root[data-theme="dark"]{
   --bg:#0D1220; --surface:#151C2D; --sunken:#1B2337; --ink:#E5E9F2; --muted:#97A2BA; --line:#273149;
@@ -37,6 +40,7 @@
   --sub:#38C4AE; --sub-soft:#0F3530;
   --ok:#4CC98A; --ok-soft:#123323; --bad:#F2777C; --bad-soft:#3B1719;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 16px rgba(0,0,0,.25); color-scheme:dark;
+  --side:#080D18; --side-active:#18243B; --hero:#1A2844; --bg-glass:rgba(13,18,32,.88);
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -57,19 +61,71 @@ p{margin:0}
 button,input,select{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--net);outline-offset:2px}
 
-/* header */
-.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:18px}
-.brand{display:flex;align-items:center;gap:14px}
-.glyph{display:grid;grid-template-columns:repeat(4,8px);gap:2px}
-.glyph i{width:8px;height:8px;border-radius:2px;background:var(--net)}
+/* app shell */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:25;background:var(--bg)}
+.app{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
+.main{min-width:0}
+.side{background:var(--side);color:var(--side-ink);position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:18px;overflow-y:auto;z-index:40;
+  padding-block:22px calc(16px + env(safe-area-inset-bottom,0px));padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:12px}
+.brand{display:flex;align-items:center;gap:12px;padding:0 8px}
+.brand strong{display:block;color:var(--side-strong);font-family:var(--f-display);font-size:1.05rem;font-weight:600;letter-spacing:-.01em}
+.brand span{display:block;font-size:.75rem;color:var(--side-dim)}
+.glyph{display:grid;grid-template-columns:repeat(4,7px);gap:2px;padding:8px;background:var(--side-active);border-radius:10px}
+.glyph i{width:7px;height:7px;border-radius:2px;background:var(--hero-accent)}
 .glyph i.h{background:var(--host)}
-.tagline{color:var(--muted);font-size:.9rem}
-.tabs-scroll{overflow-x:auto;margin-bottom:20px;border-bottom:1px solid var(--line)}
-.tabs{display:flex;gap:2px;min-width:max-content}
-.tab{background:none;border:0;padding:10px 14px;cursor:pointer;color:var(--muted);font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
-.tab:hover{color:var(--ink)}
-.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--net)}
-.tab .count{font-family:var(--f-mono);font-size:.75rem;background:var(--sunken);border-radius:10px;padding:1px 7px;margin-left:6px}
+.nav{display:grid;gap:2px}
+.nav-group{font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--side-dim);font-weight:700;padding:14px 12px 6px;margin:0}
+.nav-item{display:flex;align-items:center;gap:11px;width:100%;border:0;background:none;color:var(--side-ink);padding:9px 12px;border-radius:8px;cursor:pointer;font-weight:500;text-align:left}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav-item:hover{background:rgba(255,255,255,.06);color:var(--side-strong)}
+.nav-item[aria-current="page"]{background:var(--side-active);color:var(--side-strong)}
+.nav-item[aria-current="page"] svg{stroke:var(--hero-accent)}
+.nav-item .count{margin-left:auto;font-family:var(--f-mono);font-size:.72rem;background:rgba(255,255,255,.1);color:var(--side-strong);border-radius:10px;padding:1px 8px}
+.nav-item:focus-visible,.theme-btn:focus-visible{outline-color:var(--hero-accent)}
+.side-foot{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding:14px 8px 0;display:grid;gap:10px;font-size:.78rem;color:var(--side-dim)}
+.side-foot kbd{background:transparent;color:var(--side-ink);border-color:rgba(255,255,255,.2)}
+.theme-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--side-ink);border-radius:8px;padding:7px 10px;cursor:pointer;font-size:.8rem}
+.theme-btn:hover{color:var(--side-strong)}
+.scrim{position:fixed;inset:0;background:rgba(5,10,20,.5);z-index:35}
+
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg-glass);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+  display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.tb-title{flex:1 1 260px;min-width:0}
+.topbar h1{font-size:1.45rem;margin-top:2px}
+.tb-desc{color:var(--muted);font-size:.88rem;margin-top:2px}
+.tb-actions{display:flex;gap:8px;flex-wrap:wrap}
+.tb-group{display:flex;gap:8px;flex-wrap:wrap}
+.icon-btn{display:none;align-items:center;justify-content:center;width:40px;height:40px;border:1px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer;flex-shrink:0}
+.icon-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.eyebrow{display:block;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--net)}
+@media (min-width:901px){
+  .topbar{padding-left:32px;padding-right:32px;padding-block:20px}
+  .wrap{padding-left:32px;padding-right:32px;padding-block:28px 64px}
+}
+@media (max-width:900px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed;left:0;top:0;bottom:0;height:auto;width:min(280px,86vw);transform:translateX(-105%);transition:transform .2s ease;box-shadow:0 0 40px rgba(0,0,0,.3)}
+  .app.nav-open .side{transform:none}
+  .icon-btn{display:inline-flex}
+}
+@media (max-width:620px){.tb-desc{display:none}.topbar h1{font-size:1.2rem}}
+@media (prefers-reduced-motion:reduce){.side{transition:none}}
+
+/* calculator hero */
+.hero{background:var(--hero);color:var(--hero-ink);border-radius:12px;padding:22px 26px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:18px 32px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.hero::after{content:"";position:absolute;right:-70px;top:-130px;width:320px;height:320px;border-radius:50%;border:64px solid rgba(255,255,255,.04);pointer-events:none}
+.hero .eyebrow{color:var(--hero-accent)}
+.hero-main{position:relative;z-index:1;min-width:0}
+.hero-cidr{display:flex;align-items:baseline;gap:8px;font-family:var(--f-mono);margin-top:4px;flex-wrap:wrap}
+.hero-cidr strong{font-size:clamp(1.5rem,4vw,2.15rem);font-weight:600;letter-spacing:-.02em}
+.hero-cidr span{font-size:1.3rem;color:var(--hero-accent)}
+.hero p{color:var(--hero-muted);font-family:var(--f-mono);font-size:.85rem;margin-top:6px;overflow-wrap:anywhere}
+.hero-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.hero-tags span{font-size:.75rem;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:2px 10px;color:var(--hero-muted)}
+.hero-hosts{position:relative;z-index:1;text-align:right;border-left:1px solid rgba(255,255,255,.15);padding-left:32px}
+.hero-hosts strong{display:block;font-family:var(--f-mono);font-size:2.3rem;font-weight:500;line-height:1.15}
+.hero-hosts span,.hero-hosts small{display:block;color:var(--hero-muted);font-size:.8rem}
+@media (max-width:620px){.hero{padding:18px}.hero-hosts{text-align:left;border-left:0;padding-left:0;border-top:1px solid rgba(255,255,255,.15);padding-top:14px;width:100%}}
 
 /* panels */
 .view,.subview{display:grid;gap:18px}
@@ -226,7 +282,9 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
 @media (prefers-reduced-motion:no-preference){.toast{animation:pop .18s ease-out}@keyframes pop{from{transform:translate(-50%,8px);opacity:0}}}
 
 @media print{
-  .tabs-scroll,.btn,.no-print,.seg,input[type=range]{display:none!important}
+  .side,.scrim,.icon-btn,.tb-actions,.btn,.no-print,.seg,input[type=range]{display:none!important}
+  .app{display:block}
+  .topbar{position:static;backdrop-filter:none}
   .panel{box-shadow:none;border-color:#bbb}
   body{background:#fff;color:#000}
 }
@@ -234,34 +292,35 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
 </head>
 <body>
 
-<div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <div class="glyph" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i class="h"></i><i class="h"></i><i class="h"></i></div>
-      <div>
-        <h1>Subnet Calculator</h1>
-        <p class="tagline">IPv4 subnets, masks, VLSM, number conversion and practice</p>
-      </div>
-    </div>
-    <div class="legend" aria-label="Bit colors">
-      <span style="--c:var(--net)">Network bits</span>
-      <span style="--c:var(--sub)">Borrowed subnet bits</span>
-      <span style="--c:var(--host)">Host bits</span>
-    </div>
-  </header>
-
-  <div class="tabs-scroll">
-    <nav class="tabs" role="tablist" aria-label="Tools">
-      <button class="tab" role="tab" data-view="calc">Calculator</button>
-      <button class="tab" role="tab" data-view="convert">Number conversion</button>
-      <button class="tab" role="tab" data-view="masks">Mask converter</button>
-      <button class="tab" role="tab" data-view="equal">Equal subnets</button>
-      <button class="tab" role="tab" data-view="vlsm">VLSM planner</button>
-      <button class="tab" role="tab" data-view="practice">Practice</button>
-      <button class="tab" role="tab" data-view="saved">Saved &amp; history<span class="count" id="saved-count">0</span></button>
+<div class="app">
+  <aside class="side" id="side" aria-label="Main navigation">
+    <div class="brand"><div class="glyph" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i class="h"></i><i class="h"></i><i class="h"></i></div><div><strong>Subnet Calculator</strong><span>IPv4 toolkit</span></div></div>
+    <nav class="nav">
+      <p class="nav-group">Calculate</p>
+      <button class="nav-item" data-view="calc"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 18.5h8"/></svg><span>Calculator</span></button>
+      <button class="nav-item" data-view="convert"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 12 4 4-4 4"/><path d="M21 16H7"/></svg><span>Number conversion</span></button>
+      <button class="nav-item" data-view="masks"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>Mask converter</span></button>
+      <p class="nav-group">Plan</p>
+      <button class="nav-item" data-view="equal"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18M3 12h18"/></svg><span>Equal subnets</span></button>
+      <button class="nav-item" data-view="vlsm"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 10h18M10 10v11M10 15.5h11"/></svg><span>VLSM planner</span></button>
+      <p class="nav-group">Learn</p>
+      <button class="nav-item" data-view="practice"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><span>Practice</span></button>
+      <p class="nav-group">Library</p>
+      <button class="nav-item" data-view="saved"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg><span>Saved &amp; history</span><span class="count" id="saved-count">0</span></button>
     </nav>
-  </div>
-
+    <div class="side-foot">
+      <button type="button" class="theme-btn" id="theme-btn" hidden><span>Theme</span><span id="theme-label">System</span></button>
+      <p>Press <kbd>/</kbd> to jump to the main input.</p>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+  <main class="main">
+    <header class="topbar">
+      <button type="button" class="icon-btn" id="menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div class="tb-title"><span class="eyebrow" id="pg-eyebrow">Calculate</span><h1 id="pg-title">Subnet calculator</h1><p class="tb-desc" id="pg-desc"></p></div>
+      <div class="tb-actions" id="top-actions"></div>
+    </header>
+<div class="wrap">
   <!-- CALCULATOR -->
   <section class="view" id="v-calc" data-view="calc">
     <div class="cols">
@@ -271,7 +330,7 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
             <label class="label" for="calc-in">IP address with prefix or mask</label>
             <input class="big" type="text" id="calc-in" value="192.168.10.77/26" spellcheck="false" autocomplete="off" placeholder="192.168.10.77/26">
           </div>
-          <button class="btn" id="calc-save">Save</button>
+          <button class="btn primary" id="calc-save">Save</button>
           <button class="btn" id="calc-export">Export</button>
         </div>
         <p class="err" id="calc-err" hidden></p>
@@ -280,7 +339,7 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
           <input type="range" id="calc-prefix" min="0" max="32" value="26">
         </div>
         <div style="margin-top:14px" class="field">
-          <span class="label">Address bits · click a bit to move the network/host boundary</span>
+          <div style="display:flex;justify-content:space-between;gap:6px 12px;flex-wrap:wrap"><span class="label">Address bits · click a bit to move the boundary</span><div class="legend"><span style="--c:var(--net)">Network</span><span style="--c:var(--host)">Host</span></div></div>
           <div class="bits" id="calc-bits"></div>
         </div>
       </div>
@@ -289,8 +348,9 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
         <div class="list" id="calc-recent"></div>
       </div>
     </div>
+    <div class="hero" id="calc-hero"></div>
     <div class="panel">
-      <div class="hero-nums" id="calc-hero"></div>
+      <div class="panel-head"><h3>All details</h3><span class="small muted">Click a value to copy it</span></div>
       <dl class="kv" id="calc-kv"></dl>
     </div>
     <div class="panel">
@@ -305,7 +365,6 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
   <!-- CONVERT -->
   <section class="view" id="v-convert" data-view="convert" hidden>
     <div class="panel">
-      <div class="panel-head"><div><h2>Number conversion</h2><p class="muted small">Type in any box and the other two update. The working for every method is shown below.</p></div></div>
       <div class="cv-inputs">
         <div class="field"><label class="label" for="cv-dec">Decimal · base 10</label><input type="text" class="big" id="cv-dec" value="200" inputmode="numeric" spellcheck="false" autocomplete="off"></div>
         <div class="field"><label class="label" for="cv-bin">Binary · base 2</label><input type="text" class="big" id="cv-bin" spellcheck="false" autocomplete="off"></div>
@@ -367,7 +426,7 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
   <section class="view" id="v-masks" data-view="masks" hidden>
     <div class="cols-even">
       <div class="panel">
-        <h2 style="margin-bottom:4px">Mask converter</h2>
+        <h3 style="margin-bottom:4px">Convert a mask</h3>
         <p class="muted small" style="margin-bottom:12px">Type a prefix (<span class="mono">/22</span>), a subnet mask (<span class="mono">255.255.252.0</span>), a wildcard (<span class="mono">0.0.3.255</span>) or a host count (<span class="mono">500 hosts</span>).</p>
         <input type="text" class="big" id="mask-in" value="255.255.252.0" spellcheck="false" autocomplete="off">
         <p class="small muted" id="mask-detected" style="margin-top:8px"></p>
@@ -386,7 +445,7 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
   <!-- EQUAL -->
   <section class="view" id="v-equal" data-view="equal" hidden>
     <div class="panel">
-      <div class="panel-head"><h2>Equal subnetting</h2><div class="row"><button class="btn" id="eq-save">Save</button><button class="btn" id="eq-export">Export</button></div></div>
+      <div class="panel-head"><h3>Divide a network</h3><div class="row"><button class="btn primary" id="eq-save">Save</button><button class="btn" id="eq-export">Export</button></div></div>
       <div class="row">
         <div class="field grow"><label class="label" for="eq-net">Network to divide</label><input type="text" class="mono" id="eq-net" value="172.16.0.0/22" spellcheck="false"></div>
         <div class="field"><span class="label">Divide by</span><div class="seg" id="eq-mode"><button data-mode="subnets" aria-pressed="true">Number of subnets</button><button data-mode="hosts" aria-pressed="false">Hosts per subnet</button></div></div>
@@ -397,7 +456,7 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
     </div>
     <div class="panel" id="eq-out-panel">
       <div class="hero-nums" id="eq-hero"></div>
-      <div class="field" style="margin-bottom:14px"><span class="label">Prefix split</span><div class="bits static" id="eq-bits"></div></div>
+      <div class="field" style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;gap:6px 12px;flex-wrap:wrap"><span class="label">Prefix split</span><div class="legend"><span style="--c:var(--net)">Original network</span><span style="--c:var(--sub)">Borrowed</span><span style="--c:var(--host)">Host</span></div></div><div class="bits static" id="eq-bits"></div></div>
       <div class="tbl-wrap tbl-scroll"><table id="eq-table"></table></div>
       <p class="note" id="eq-more" style="margin-top:8px"></p>
     </div>
@@ -407,7 +466,7 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
   <section class="view" id="v-vlsm" data-view="vlsm" hidden>
     <div class="cols-even">
       <div class="panel">
-        <div class="panel-head"><h2>VLSM planner</h2><div class="row"><button class="btn" id="v-save">Save</button><button class="btn" id="v-export">Export</button></div></div>
+        <div class="panel-head"><h3>Subnets to place</h3><div class="row"><button class="btn primary" id="v-save">Save</button><button class="btn" id="v-export">Export</button></div></div>
         <div class="field" style="margin-bottom:14px"><label class="label" for="v-base">Address block</label><input type="text" class="mono" id="v-base" value="10.20.0.0/22" spellcheck="false"></div>
         <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span class="label">Subnet name</span><span class="label" style="margin-right:84px">Hosts</span></div>
         <div class="vrows" id="v-rows"></div>
@@ -504,15 +563,17 @@ pre.preview{margin:0;max-height:260px;overflow:auto;background:var(--sunken);bor
   <section class="view" id="v-saved" data-view="saved" hidden>
     <div class="cols-even">
       <div class="panel">
-        <div class="panel-head"><div><h2>Saved</h2><p class="small muted" id="saved-where"></p></div><button class="btn sm" id="saved-export">Export all</button></div>
+        <div class="panel-head"><div><h3>Saved</h3><p class="small muted" id="saved-where"></p></div><button class="btn sm" id="saved-export">Export all</button></div>
         <div class="list" id="saved-list"></div>
       </div>
       <div class="panel">
-        <div class="panel-head"><div><h2>History</h2><p class="small muted">Your last 40 calculations, kept in this browser.</p></div><button class="btn ghost sm danger" id="hist-clear">Clear</button></div>
+        <div class="panel-head"><div><h3>History</h3><p class="small muted">Your last 40 calculations, kept in this browser.</p></div><button class="btn ghost sm danger" id="hist-clear">Clear</button></div>
         <div class="list" id="hist-list"></div>
       </div>
     </div>
   </section>
+</div>
+  </main>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -837,14 +898,8 @@ function renderCalc(){
   $('#calc-prefix').value=c.p;
   $('#calc-prefix-out').textContent=`/${c.p} · ${ipStr(c.mask)}`;
   renderBits($('#calc-bits'), c.ip, c.p);
-  $('#calc-hero').innerHTML = [
-    ['Network', ipStr(c.net)+'/'+c.p], ['Usable range', c.p>=31? `${ipStr(c.first)} – ${ipStr(c.last)}` : `.${c.first&255} – .${c.last&255}`.replace(/^/, '')],
-    ['Usable hosts', fmt(c.usable)], ['Broadcast', ipStr(c.bc)]
-  ].map(([k,v])=>`<div class="num"><span class="label">${k}</span><b>${esc(v)}</b></div>`).join('');
-  // usable range: show full when octets other than last differ
-  const sameUpper = (c.first>>>8)===(c.last>>>8);
-  if(!sameUpper || c.p>=31) $$('#calc-hero .num b')[1].textContent = `${ipStr(c.first)} – ${ipStr(c.last)}`;
-  else $$('#calc-hero .num b')[1].textContent = `${ipStr(c.first)} – .${c.last&255}`;
+  const range = (c.p>=31 || (c.first>>>8)!==(c.last>>>8)) ? `${ipStr(c.first)} – ${ipStr(c.last)}` : `${ipStr(c.first)} – .${c.last&255}`;
+  $('#calc-hero').innerHTML = `<div class="hero-main"><span class="eyebrow">Network</span><div class="hero-cidr"><strong>${ipStr(c.net)}</strong><span>/${c.p}</span></div><p>Hosts ${range} · Broadcast ${ipStr(c.bc)}</p><div class="hero-tags"><span>Mask ${ipStr(c.mask)}</span><span>Class ${esc(classOf(c.ip))}</span><span>${esc(typeOf(c.ip))}</span></div></div><div class="hero-hosts"><span>Usable hosts</span><strong>${fmt(c.usable)}</strong><small>${fmt(c.size)} total addresses</small></div>`;
   $('#calc-kv').innerHTML = calcKV().map(([k,v])=>`<div><dt>${k}</dt><dd class="copyable" title="Click to copy">${esc(v)}</dd></div>`).join('');
   renderCheck();
 }
@@ -1399,6 +1454,55 @@ $('#saved-export').onclick=()=>{
   openExport({title:'Saved subnet calculations', sections});
 };
 
+/* ================= app chrome ================= */
+const PAGE_META = {
+  calc:['Calculate','Subnet calculator','Type an address with a prefix or mask, like 192.168.10.77/26.'],
+  convert:['Calculate','Number conversion','Convert between decimal, binary and hexadecimal, with the working shown.'],
+  masks:['Calculate','Mask converter','Turn a prefix, mask, wildcard or host count into every other form.'],
+  equal:['Plan','Equal subnetting','Split a network into equal-sized subnets.'],
+  vlsm:['Plan','VLSM planner','Fit subnets of different sizes into one address block.'],
+  practice:['Learn','Practice','Drill subnetting with a worksheet or quick questions.'],
+  saved:['Library','Saved & history','Reopen saved calculations and recent work.']
+};
+const PAGE_ACTIONS = {calc:['calc-export','calc-save'], equal:['eq-export','eq-save'], vlsm:['v-export','v-save']};
+const actGroups = {};
+Object.entries(PAGE_ACTIONS).forEach(([v,ids])=>{
+  const g=document.createElement('div'); g.className='tb-group'; g.hidden=true;
+  ids.forEach(id=>{ const b=$('#'+id); if(b) g.appendChild(b); });
+  $('#top-actions').appendChild(g); actGroups[v]=g;
+});
+function setChrome(v){
+  const m=PAGE_META[v]||PAGE_META.calc;
+  $('#pg-eyebrow').textContent=m[0]; $('#pg-title').textContent=m[1]; $('#pg-desc').textContent=m[2];
+  Object.entries(actGroups).forEach(([k,g])=>g.hidden = k!==v);
+}
+function setNav(open){
+  $('.app').classList.toggle('nav-open',open); $('#scrim').hidden=!open; $('#menu-btn').setAttribute('aria-expanded',String(open));
+  if(open){ const a=$('.nav-item[aria-current="page"]')||$('.nav-item'); a.focus(); }
+}
+$('#menu-btn').onclick=()=>setNav(true);
+$('#scrim').onclick=()=>setNav(false);
+const FOCUS = {calc:'#calc-in', convert:'#cv-dec', masks:'#mask-in', equal:'#eq-net', vlsm:'#v-base'};
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape' && $('.app').classList.contains('nav-open')){ setNav(false); $('#menu-btn').focus(); return; }
+  if(e.key==='/' && !e.metaKey && !e.ctrlKey && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) && $('#modal').hidden){
+    let el=null;
+    if(currentView==='practice'){ if(pr.mode==='sheet'){ e.preventDefault(); wsFocusFirst(); return; } el=$('#pr-answer'); }
+    else if(FOCUS[currentView]) el=$(FOCUS[currentView]);
+    if(el && !el.disabled){ e.preventDefault(); el.focus(); if(el.select) el.select(); }
+  }
+});
+// theme switch for the standalone site; inside claude.ai the viewer controls the theme
+(function(){
+  if(window.claude && typeof window.claude.use==='function') return;
+  const btn=$('#theme-btn'); btn.hidden=false;
+  const modes=['system','light','dark'], names={system:'System',light:'Light',dark:'Dark'};
+  let mode=LS.get('sc.theme','system'); if(!modes.includes(mode)) mode='system';
+  const apply=()=>{ if(mode==='system') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme',mode); $('#theme-label').textContent=names[mode]; };
+  btn.onclick=()=>{ mode=modes[(modes.indexOf(mode)+1)%3]; LS.set('sc.theme',mode); apply(); };
+  apply();
+})();
+
 /* ================= routing ================= */
 const VIEWS=['calc','convert','masks','equal','vlsm','practice','saved'];
 let currentView='calc';
@@ -1406,13 +1510,16 @@ function go(v){ if(location.hash!=='#'+v) location.hash=v; else show(v); }
 function show(v){
   if(v==='binary') v='convert';
   if(!VIEWS.includes(v)) v='calc'; currentView=v;
+  const changed = currentView!==v || !$('#v-'+v) || $('#v-'+v).hidden;
   $$('.view').forEach(s=>s.hidden = s.dataset.view!==v);
-  $$('.tab').forEach(t=>t.setAttribute('aria-selected', t.dataset.view===v));
+  if(changed) window.scrollTo(0,0);
+  $$('.nav-item').forEach(t=>{ if(t.dataset.view===v) t.setAttribute('aria-current','page'); else t.removeAttribute('aria-current'); });
+  setChrome(v);
   if(v==='practice'){ if(pr.mode==='sheet') wsFocusFirst(); else if(q && !q.done && q.kind!=='yn') $('#pr-answer').focus({preventScroll:true}); }
   if(v==='saved'){ renderHistory(); renderSaved(); }
   try{ LS.set('sc.view',v); }catch(e){}
 }
-$$('.tab').forEach(t=>t.onclick=()=>go(t.dataset.view));
+$$('.nav-item').forEach(t=>t.onclick=()=>{ go(t.dataset.view); setNav(false); });
 document.addEventListener('click',e=>{ const g=e.target.closest('[data-goto]'); if(g) go(g.dataset.goto); });
 window.addEventListener('hashchange',()=>show(location.hash.slice(1)));
 

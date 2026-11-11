@@ -63,13 +63,13 @@
         </div>
       </div>
       <div class="panel">
-        <div class="panel-head"><h3>Recent</h3><button class="btn ghost sm" data-goto="saved">All</button></div>
+        <div class="panel-head"><h2>Recent</h2><button class="btn ghost sm" data-goto="saved">All</button></div>
         <div class="list" id="calc-recent"></div>
       </div>
     </div>
     <div class="hero" id="calc-hero"></div>
     <div class="panel">
-      <div class="panel-head"><h3>Details</h3><span class="small muted">Click a value to copy it. Export includes binary, hex and more.</span></div>
+      <div class="panel-head"><h2>Details</h2><span class="small muted">Click a value to copy it. Export includes binary, hex and more.</span></div>
       <dl class="kv" id="calc-kv"></dl>
     </div>
   </section>
@@ -101,7 +101,7 @@
     </div>
 
     <div class="panel">
-      <div class="panel-head"><div><h3>Show the working</h3><p class="muted small">The method follows the box you type in. Pick another any time.</p></div></div>
+      <div class="panel-head"><div><h2>Show the working</h2><p class="muted small">The method follows the box you type in. Pick another any time.</p></div></div>
       <div class="cv-tabs" role="tablist" aria-label="Conversion method" id="cv-tabs">
         <button type="button" role="tab" data-w="d2b">Decimal → binary</button>
         <button type="button" role="tab" data-w="b2d">Binary → decimal</button>
@@ -114,13 +114,13 @@
 
     <div class="cols-even">
       <div class="panel">
-        <div class="panel-head"><div><h3>Convert an IP address</h3><p class="muted small">Each octet converts on its own. Pick an octet to see its working.</p></div></div>
+        <div class="panel-head"><div><h2>Convert an IP address</h2><p class="muted small">Each octet converts on its own. Pick an octet to see its working.</p></div></div>
         <div class="cv-box"><input type="text" id="cv-ip" value="192.168.1.10" spellcheck="false" autocomplete="off" aria-label="IP address to convert"></div>
         <div class="tbl-wrap" style="margin-top:12px"><table id="cv-ip-table"></table></div>
         <dl class="kv" id="cv-ip-kv" style="grid-template-columns:minmax(0,1fr);margin-top:8px"></dl>
       </div>
       <div class="panel">
-        <div class="panel-head"><h3>Conversion drill</h3><span class="chip" id="cv-score"></span></div>
+        <div class="panel-head"><h2>Conversion drill</h2><span class="chip" id="cv-score"></span></div>
         <p class="qprompt" id="cv-prompt" style="font-size:1.15rem"></p>
         <form id="cv-form" class="row" style="margin-top:14px" autocomplete="off">
           <div class="field grow"><label class="label" for="cv-ans">Your answer</label><input type="text" class="mono" id="cv-ans" spellcheck="false"></div>
@@ -132,7 +132,7 @@
     </div>
 
     <div class="panel">
-      <div class="panel-head"><div><h3>Nibble reference</h3><p class="muted small">Every hex digit and its 4-bit pattern. Click one to convert it.</p></div></div>
+      <div class="panel-head"><div><h2>Nibble reference</h2><p class="muted small">Every hex digit and its 4-bit pattern. Click one to convert it.</p></div></div>
       <div class="nib-grid" id="cv-nibbles"></div>
       <p class="label" style="margin-top:16px;margin-bottom:8px">Mask octet values</p>
       <div class="tbl-wrap"><table id="cv-masks"></table></div>
@@ -156,13 +156,13 @@
     <div class="mk-tiles" id="mask-tiles"></div>
 
     <div class="panel">
-        <div class="panel-head"><h3>Mask in binary</h3><div class="legend"><span style="--c:var(--net)">Network</span><span style="--c:var(--host)">Host</span></div></div>
+        <div class="panel-head"><h2>Mask in binary</h2><div class="legend"><span style="--c:var(--net)">Network</span><span style="--c:var(--host)">Host</span></div></div>
         <div class="bits static" id="mask-bits"></div>
         <p class="note" id="mask-block" style="margin-top:14px"></p>
     </div>
 
     <div class="panel">
-      <div class="panel-head"><div><h3>Prefix reference</h3><p class="muted small">Every prefix from /32 to /0. Click a row to convert it.</p></div><button class="btn" id="mask-export">Export table</button></div>
+      <div class="panel-head"><div><h2>Prefix reference</h2><p class="muted small">Every prefix from /32 to /0. Click a row to convert it.</p></div><button class="btn" id="mask-export">Export table</button></div>
       <div class="tbl-wrap tbl-scroll" id="mask-table-wrap"><table id="mask-table"></table></div>
     </div>
   </section>
@@ -179,13 +179,13 @@
 
     <div class="vl-grid">
       <div class="panel">
-        <div class="panel-head"><div><h3>Subnets</h3><p class="muted small">Enter the hosts each subnet needs. Press Enter in the last row to add another.</p></div></div>
+        <div class="panel-head"><div><h2>Subnets</h2><p class="muted small">Enter the hosts each subnet needs. Press Enter in the last row to add another.</p></div></div>
         <div class="vhead" aria-hidden="true"><span></span><span>Name</span><span>Hosts</span><span style="text-align:right">Gets</span><span></span></div>
         <div id="v-rows"></div>
         <div class="row" style="margin-top:12px;justify-content:space-between"><button class="btn sm" id="v-add">+ Add subnet</button><button class="btn ghost sm danger" id="v-clear">Clear all</button></div>
       </div>
       <div class="panel">
-        <div class="panel-head"><h3>Allocation</h3></div>
+        <div class="panel-head"><h2>Allocation</h2></div>
         <div class="vl-status" id="v-status"></div>
         <div class="vl-stats" id="v-hero"></div>
         <span class="label">Address space</span>
@@ -196,7 +196,7 @@
     </div>
 
     <div class="panel">
-      <div class="panel-head"><div><h3>Subnet plan</h3><p class="muted small">Placed largest first so every block starts on its own boundary. Click a row to open it in the calculator.</p></div></div>
+      <div class="panel-head"><div><h2>Subnet plan</h2><p class="muted small">Placed largest first so every block starts on its own boundary. Click a row to open it in the calculator.</p></div></div>
       <div class="tbl-wrap"><table id="v-table"></table></div>
     </div>
   </section>
@@ -228,7 +228,7 @@
           <div id="ws-explain"></div>
         </div>
         <div class="panel">
-          <h3 style="margin-bottom:8px">How it works</h3>
+          <h2 style="margin-bottom:8px">How it works</h2>
           <ul class="small muted ws-help">
             <li>Type each octet. Press <kbd>.</kbd>, <kbd>/</kbd> or <kbd>Space</kbd> to jump to the next box. A box also advances after three digits.</li>
             <li>Press <kbd>Enter</kbd> to go Check all → Show all → Next problem.</li>
@@ -265,7 +265,7 @@
       </div>
       <div class="panel">
         <p class="note" id="pr-level-note" style="margin-bottom:16px"></p>
-        <h3 style="margin-bottom:10px">Question types</h3>
+        <h2 style="margin-bottom:10px">Question types</h2>
         <div class="chips" id="pr-types"></div>
         <button class="btn ghost sm danger" id="pr-reset" style="margin-top:16px">Reset score</button>
       </div>
@@ -277,11 +277,11 @@
   <section class="view" id="v-saved" data-view="saved" hidden>
     <div class="cols-even">
       <div class="panel">
-        <div class="panel-head"><div><h3>Saved</h3><p class="small muted" id="saved-where"></p></div><button class="btn sm" id="saved-export">Export all</button></div>
+        <div class="panel-head"><div><h2>Saved</h2><p class="small muted" id="saved-where"></p></div><button class="btn sm" id="saved-export">Export all</button></div>
         <div class="list" id="saved-list"></div>
       </div>
       <div class="panel">
-        <div class="panel-head"><div><h3>History</h3><p class="small muted">Your last 40 calculations, kept in this browser.</p></div><button class="btn ghost sm danger" id="hist-clear">Clear</button></div>
+        <div class="panel-head"><div><h2>History</h2><p class="small muted">Your last 40 calculations, kept in this browser.</p></div><button class="btn ghost sm danger" id="hist-clear">Clear</button></div>
         <div class="list" id="hist-list"></div>
       </div>
     </div>
@@ -292,7 +292,7 @@
 
 <div class="modal" id="modal" hidden>
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal-head"><h3 id="modal-title"></h3><button class="btn ghost sm" id="modal-close" aria-label="Close">Close</button></div>
+    <div class="modal-head"><h2 id="modal-title">Dialog</h2><button class="btn ghost sm" id="modal-close" aria-label="Close">Close</button></div>
     <div id="modal-body" style="display:grid;gap:12px"></div>
   </div>
 </div>
